@@ -1,228 +1,599 @@
-import os
-from datetime import datetime
-import pandas as pd
-import streamlit as st
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RC Serviço e Comércio - Gestão de Vendas e Recibos</title>
+    <!-- Tailwind CSS para Estilização Moderna -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- FontAwesome para Ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- jsPDF e AutoTable para Geração de PDFs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen">
 
-from reportlab.lib.pagesizes import A4
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib import colors
+    <!-- Cabeçalho -->
+    <header class="bg-blue-900 text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center space-x-3 mb-2 md:mb-0">
+                <i class="fa-solid fa-receipt text-2xl text-blue-300"></i>
+                <div>
+                    <h1 class="text-xl font-bold tracking-wide">RC Serviço e Comércio</h1>
+                    <p class="text-xs text-blue-200">Sistema de Gestão de Vendas, Recibos e Relatórios</p>
+                </div>
+            </div>
+            <!-- Navegação por Abas -->
+            <div class="flex space-x-2">
+                <button onclick="switchTab('vendas')" id="btn-vendas" class="px-4 py-2 rounded-lg bg-blue-700 text-white font-medium text-sm transition hover:bg-blue-600 shadow">
+                    <i class="fa-solid fa-cash-register mr-1"></i> Nova Venda
+                </button>
+                <button onclick="switchTab('indicadores')" id="btn-indicadores" class="px-4 py-2 rounded-lg bg-blue-800 text-blue-100 font-medium text-sm transition hover:bg-blue-700">
+                    <i class="fa-solid fa-chart-pie mr-1"></i> Indicadores & Relatórios
+                </button>
+            </div>
+        </div>
+    </header>
 
-# Configuração da Página do Streamlit
-st.set_page_config(
-    page_title="Gerador de Recibos e Relatórios",
-    page_icon="🧾",
-    layout="wide"
-)
+    <!-- Conteúdo Principal -->
+    <main class="max-w-7xl mx-auto px-4 py-6">
 
-# Inicialização do Banco de Dados em Sessão (Simulado)
-if "sales_data" not in st.session_state:
-    st.session_state.sales_data = pd.DataFrame(columns=[
-        "ID", "Data", "Cliente", "Produto", "Quantidade", "Valor Unitário", "Total"
-    ])
+        <!-- ABA 1: NOVA VENDA / REGISTRO -->
+        <section id="tab-vendas" class="space-y-6">
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-200 max-w-2xl mx-auto">
+                <h2 class="text-lg font-bold text-slate-700 mb-4 pb-2 border-b border-slate-100">
+                    <i class="fa-solid fa-cart-plus text-blue-600 mr-2"></i> Registrar Nova Venda / Serviço
+                </h2>
 
-# Função para Gerar PDF de Relatório de Vendas
-def generate_sales_report_pdf(df_filtered, start_date, end_date):
-    pdf_path = "relatorio_vendas.pdf"
-    doc = SimpleDocTemplate(pdf_path, pagesize=A4, rightMargin=30, leftMargin=30, topMargin=30, bottomMargin=30)
-    elements = []
-    
-    styles = getSampleStyleSheet()
-    title_style = ParagraphStyle(
-        'TitleStyle',
-        parent=styles['Heading1'],
-        fontSize=18,
-        textColor=colors.HexColor('#1f2937'),
-        alignment=1, # Centralizado
-        spaceAfter=15
-    )
-    subtitle_style = ParagraphStyle(
-        'SubtitleStyle',
-        parent=styles['Normal'],
-        fontSize=10,
-        textColor=colors.HexColor('#4b5563'),
-        alignment=1,
-        spaceAfter=20
-    )
-    
-    # Cabeçalho
-    elements.append(Paragraph("<b>Relatório de Produtos Vendidos</b>", title_style))
-    period_str = f"Período: {start_date.strftime('%d/%m/%Y')} a {end_date.strftime('%d/%m/%Y')}"
-    elements.append(Paragraph(period_str, subtitle_style))
-    elements.append(Spacer(1, 10))
-    
-    # Tabela de Dados
-    table_data = [["Data", "Cliente", "Produto", "Qtd", "Unitário", "Total"]]
-    for _, row in df_filtered.iterrows():
-        table_data.append([
-            str(row["Data"]),
-            str(row["Cliente"]),
-            str(row["Produto"]),
-            str(row["Quantidade"]),
-            f"R$ {row['Valor Unitário']:.2f}",
-            f"R$ {row['Total']:.2f}"
-        ])
-        
-    t = Table(table_data, colWidths=[70, 110, 140, 40, 65, 65])
-    t.setStyle(TableStyle([
-        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#3b82f6')),
-        ('TEXTCOLOR', (0,0), (-1,0), colors.whitesmoke),
-        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
-        ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0,0), (-1,0), 10),
-        ('BOTTOMPADDING', (0,0), (-1,0), 8),
-        ('BACKGROUND', (0,1), (-1,-1), colors.HexColor('#f9fafb')),
-        ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#d1d5db')),
-        ('FONTSIZE', (0,1), (-1,-1), 9),
-    ]))
-    
-    elements.append(t)
-    elements.append(Spacer(1, 15))
-    
-    # Totalizador no PDF
-    total_faturamento = df_filtered["Total"].sum() if not df_filtered.empty else 0.0
-    total_itens = df_filtered["Quantidade"].sum() if not df_filtered.empty else 0
-    
-    summary_text = f"<b>Total de Itens Vendidos:</b> {total_itens} | <b>Faturamento Total:</b> R$ {total_faturamento:.2f}"
-    summary_style = ParagraphStyle('SummaryStyle', parent=styles['Normal'], fontSize=11, textColor=colors.HexColor('#111827'), alignment=2)
-    elements.append(Paragraph(summary_text, summary_style))
-    
-    doc.build(elements)
-    return pdf_path
+                <form id="form-venda" onsubmit="salvarVenda(event)" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Nome do Cliente *</label>
+                            <input type="text" id="cliente" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Produto / Serviço *</label>
+                            <input type="text" id="produto" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="Ex: Salgados, Manutenção...">
+                        </div>
+                    </div>
 
-# Função para Gerar Recibo Individual em PDF
-def generate_receipt_pdf(receipt_data):
-    pdf_path = f"recibo_{receipt_data['ID']}.pdf"
-    doc = SimpleDocTemplate(pdf_path, pagesize=A4, rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40)
-    elements = []
-    
-    styles = getSampleStyleSheet()
-    title_style = ParagraphStyle('ReciboTitle', parent=styles['Heading1'], fontSize=20, textColor=colors.HexColor('#1e3a8a'), alignment=1, spaceAfter=10)
-    normal_style = ParagraphStyle('ReciboNormal', parent=styles['Normal'], fontSize=12, textColor=colors.HexColor('#374151'), spaceAfter=8)
-    
-    elements.append(Paragraph("<b>RECIBO DE PAGAMENTO</b>", title_style))
-    elements.append(Paragraph(f"<b>Recibo Nº:</b> {receipt_data['ID']}", normal_style))
-    elements.append(Paragraph(f"<b>Data:</b> {receipt_data['Data']}", normal_style))
-    elements.append(Spacer(1, 10))
-    
-    elements.append(Paragraph(f"Recebemos de: <b>{receipt_data['Cliente']}</b>", normal_style))
-    elements.append(Paragraph(f"A quantia de: <b>R$ {receipt_data['Total']:.2f}</b>", normal_style))
-    elements.append(Spacer(1, 10))
-    
-    elements.append(Paragraph("<b>Referente ao produto/serviço:</b>", normal_style))
-    elements.append(Paragraph(f"- Produto: {receipt_data['Produto']} (Qtd: {receipt_data['Quantidade']}x R$ {receipt_data['Valor Unitário']:.2f})", normal_style))
-    elements.append(Spacer(1, 40))
-    
-    elements.append(Paragraph("___________________________________________________", ParagraphStyle('Sign', alignment=1, parent=normal_style)))
-    elements.append(Paragraph("Assinatura / Carimbo", ParagraphStyle('SignLabel', alignment=1, parent=normal_style)))
-    
-    doc.build(elements)
-    return pdf_path
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Quantidade *</label>
+                            <input type="number" id="quantidade" min="1" value="1" required oninput="calcularTotal()" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Valor Unitário (R$) *</label>
+                            <input type="number" id="valor_unitario" step="0.01" min="0.01" value="0.00" required oninput="calcularTotal()" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Total (R$)</label>
+                            <input type="text" id="total_venda" readonly class="w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-slate-700 font-bold text-sm">
+                        </div>
+                    </div>
 
-# Interface Principal
-st.title("🧾 Sistema de Recibos e Gestão de Vendas")
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Data da Venda *</label>
+                        <input type="date" id="data_venda" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                    </div>
 
-menu = st.sidebar.selectbox("Navegação", ["Registrar Venda / Emitir Recibo", "Indicadores e Relatórios"])
+                    <div class="pt-2 flex flex-col sm:flex-row gap-3">
+                        <button type="submit" class="flex-1 bg-blue-600 text-white font-medium py-2.5 px-4 rounded-lg hover:bg-blue-700 transition shadow text-sm">
+                            <i class="fa-solid fa-floppy-disk mr-1"></i> Salvar Venda
+                        </button>
+                        <button type="button" onclick="limparFormulario()" class="bg-slate-200 text-slate-700 font-medium py-2.5 px-4 rounded-lg hover:bg-slate-300 transition text-sm">
+                            Limpar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
 
-if menu == "Registrar Venda / Emitir Recibo":
-    st.header("Novo Lançamento de Venda")
-    
-    with st.form("form_venda"):
-        col1, col2 = st.columns(2)
-        with col1:
-            cliente = st.text_input("Nome do Cliente")
-            produto = st.text_input("Nome do Produto / Serviço")
-        with col2:
-            quantidade = st.number_input("Quantidade", min_value=1, value=1, step=1)
-            valor_unitario = st.number_input("Valor Unitário (R$)", min_value=0.0, value=0.0, format="%.2f")
+        <!-- ABA 2: INDICADORES E RELATÓRIOS -->
+        <section id="tab-indicadores" class="hidden space-y-6">
             
-        data_venda = st.date_input("Data da Venda", value=datetime.today())
-        
-        submitted = st.form_submit_button("Salvar Venda e Gerar Recibo")
-        
-        if submitted:
-            if cliente and produto and valor_unitario > 0:
-                total = quantidade * valor_unitario
-                sale_id = len(st.session_state.sales_data) + 1
+            <!-- Barra de Filtros e Atalhos -->
+            <div class="bg-white rounded-xl shadow-sm p-4 border border-slate-200 flex flex-col lg:flex-row justify-between items-center gap-4">
+                <div class="flex flex-wrap gap-2 items-center w-full lg:w-auto">
+                    <span class="text-sm font-medium text-slate-600 mr-2"><i class="fa-solid fa-filter mr-1"></i> Atalhos:</span>
+                    <button onclick="filtrarPeriodo('7dias')" class="px-3 py-1.5 text-xs bg-slate-100 hover:bg-blue-50 hover:text-blue-600 font-medium rounded-lg border border-slate-200 transition">Últimos 7 Dias</button>
+                    <button onclick="filtrarPeriodo('15dias')" class="px-3 py-1.5 text-xs bg-slate-100 hover:bg-blue-50 hover:text-blue-600 font-medium rounded-lg border border-slate-200 transition">Últimos 15 Dias</button>
+                    <button onclick="filtrarPeriodo('mes')" class="px-3 py-1.5 text-xs bg-slate-100 hover:bg-blue-50 hover:text-blue-600 font-medium rounded-lg border border-slate-200 transition">Este Mês</button>
+                    <button onclick="filtrarPeriodo('todos')" class="px-3 py-1.5 text-xs bg-slate-100 hover:bg-blue-50 hover:text-blue-600 font-medium rounded-lg border border-slate-200 transition">Tudo</button>
+                </div>
                 
-                new_row = {
-                    "ID": sale_id,
-                    "Data": data_venda.strftime('%Y-%m-%d'),
-                    "Cliente": cliente,
-                    "Produto": produto,
-                    "Quantidade": quantidade,
-                    "Valor Unitário": valor_unitario,
-                    "Total": total
+                <div class="flex items-center gap-2 w-full lg:w-auto justify-end">
+                    <div>
+                        <label class="text-xs text-slate-500 block">De:</label>
+                        <input type="date" id="filtro_inicio" onchange="atualizarIndicadores()" class="px-2 py-1 text-xs border border-slate-300 rounded-lg">
+                    </div>
+                    <div>
+                        <label class="text-xs text-slate-500 block">Até:</label>
+                        <input type="date" id="filtro_fim" onchange="atualizarIndicadores()" class="px-2 py-1 text-xs border border-slate-300 rounded-lg">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cards de Métricas -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-slate-500 font-medium uppercase tracking-wider">Faturamento no Período</p>
+                        <h3 id="metric-faturamento" class="text-2xl font-bold text-slate-800 mt-1">R$ 0,00</h3>
+                    </div>
+                    <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl text-xl">
+                        <i class="fa-solid fa-dollar-sign"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-slate-500 font-medium uppercase tracking-wider">Total de Itens/Salgados</p>
+                        <h3 id="metric-itens" class="text-2xl font-bold text-slate-800 mt-1">0</h3>
+                    </div>
+                    <div class="p-3 bg-blue-50 text-blue-600 rounded-xl text-xl">
+                        <i class="fa-solid fa-box-open"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-slate-500 font-medium uppercase tracking-wider">Qtd. de Vendas</p>
+                        <h3 id="metric-vendas" class="text-2xl font-bold text-slate-800 mt-1">0</h3>
+                    </div>
+                    <div class="p-3 bg-indigo-50 text-indigo-600 rounded-xl text-xl">
+                        <i class="fa-solid fa-receipt"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ações de Relatório -->
+            <div class="flex justify-end gap-3">
+                <button onclick="gerarRelatorioPDF()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-4 py-2 rounded-lg text-sm transition shadow flex items-center gap-2">
+                    <i class="fa-solid fa-file-pdf"></i> Baixar Relatório em PDF
+                </button>
+                <button onclick="compartilharResumoWhatsApp()" class="bg-green-600 hover:bg-green-700 text-white font-medium px-4 py-2 rounded-lg text-sm transition shadow flex items-center gap-2">
+                    <i class="fa-brands fa-whatsapp"></i> Compartilhar Resumo (WhatsApp)
+                </button>
+            </div>
+
+            <!-- Resumo por Produtos e Clientes -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Tabela de Produtos Vendidos -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="px-5 py-3 bg-slate-50 border-b border-slate-200">
+                        <h3 class="font-bold text-slate-700 text-sm"><i class="fa-solid fa-basket-shopping text-blue-600 mr-2"></i> Produtos / Salgados no Período</h3>
+                    </div>
+                    <div class="overflow-x-auto max-h-64">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-100 text-slate-600 text-xs uppercase sticky top-0">
+                                <tr>
+                                    <th class="px-4 py-2">Produto</th>
+                                    <th class="px-4 py-2 text-center">Qtd Total</th>
+                                    <th class="px-4 py-2 text-right">Valor Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-produtos-corpo" class="divide-y divide-slate-100">
+                                <!-- Preenchido via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Tabela por Clientes -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="px-5 py-3 bg-slate-50 border-b border-slate-200">
+                        <h3 class="font-bold text-slate-700 text-sm"><i class="fa-solid fa-users text-blue-600 mr-2"></i> Resumo por Cliente no Período</h3>
+                    </div>
+                    <div class="overflow-x-auto max-h-64">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-100 text-slate-600 text-xs uppercase sticky top-0">
+                                <tr>
+                                    <th class="px-4 py-2">Cliente</th>
+                                    <th class="px-4 py-2 text-center">Compras</th>
+                                    <th class="px-4 py-2 text-right">Total Gasto</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-clientes-corpo" class="divide-y divide-slate-100">
+                                <!-- Preenchido via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabela de Histórico Detalhado -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="px-5 py-3 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+                    <h3 class="font-bold text-slate-700 text-sm"><i class="fa-solid fa-list text-blue-600 mr-2"></i> Histórico de Vendas Filtradas</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-100 text-slate-600 text-xs uppercase">
+                            <tr>
+                                <th class="px-4 py-3">Data</th>
+                                <th class="px-4 py-3">Cliente</th>
+                                <th class="px-4 py-3">Produto</th>
+                                <th class="px-4 py-3 text-center">Qtd</th>
+                                <th class="px-4 py-3 text-right">Unitário</th>
+                                <th class="px-4 py-3 text-right">Total</th>
+                                <th class="px-4 py-3 text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-historico-corpo" class="divide-y divide-slate-100">
+                            <!-- Preenchido via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Script de Funcionalidades -->
+    <script>
+        // Inicializar data atual no formulário
+        document.getElementById('data_venda').valueAsDate = new Date();
+
+        // Carregar banco de dados do localStorage com tratamento de erro
+        let vendas = [];
+        try {
+            const stored = localStorage.getItem('rc_vendas_data');
+            if (stored) {
+                vendas = JSON.parse(stored);
+            }
+        } catch (e) {
+            console.error("Erro ao carregar vendas do localStorage", e);
+            vendas = [];
+        }
+
+        // Alternar Abas
+        function switchTab(tab) {
+            const tabVendas = document.getElementById('tab-vendas');
+            const tabIndicadores = document.getElementById('tab-indicadores');
+            const btnVendas = document.getElementById('btn-vendas');
+            const btnIndicadores = document.getElementById('btn-indicadores');
+
+            if (tab === 'vendas') {
+                tabVendas.classList.remove('hidden');
+                tabIndicadores.classList.add('hidden');
+                btnVendas.className = "px-4 py-2 rounded-lg bg-blue-700 text-white font-medium text-sm transition shadow";
+                btnIndicadores.className = "px-4 py-2 rounded-lg bg-blue-800 text-blue-100 font-medium text-sm transition hover:bg-blue-700";
+            } else {
+                tabVendas.classList.add('hidden');
+                tabIndicadores.classList.remove('hidden');
+                btnIndicadores.className = "px-4 py-2 rounded-lg bg-blue-700 text-white font-medium text-sm transition shadow";
+                btnVendas.className = "px-4 py-2 rounded-lg bg-blue-800 text-blue-100 font-medium text-sm transition hover:bg-blue-700";
+                
+                inicializarFiltrosPadrao();
+            }
+        }
+
+        function calcularTotal() {
+            const qtd = parseFloat(document.getElementById('quantidade').value) || 0;
+            const unit = parseFloat(document.getElementById('valor_unitario').value) || 0;
+            const total = qtd * unit;
+            document.getElementById('total_venda').value = `R$ ${total.toFixed(2)}`;
+        }
+
+        function salvarVenda(event) {
+            event.preventDefault();
+
+            const cliente = document.getElementById('cliente').value.trim();
+            const produto = document.getElementById('produto').value.trim();
+            const quantidade = parseInt(document.getElementById('quantidade').value);
+            const valorUnitario = parseFloat(document.getElementById('valor_unitario').value);
+            const dataVenda = document.getElementById('data_venda').value;
+
+            const novaVenda = {
+                id: Date.now(),
+                data: dataVenda,
+                cliente: cliente,
+                produto: produto,
+                quantidade: quantidade,
+                valorUnitario: valorUnitario,
+                total: quantidade * valorUnitario
+            };
+
+            vendas.push(novaVenda);
+            salvarStorage();
+
+            alert("Venda registrada com sucesso!");
+            
+            // Perguntar se deseja gerar o recibo em PDF ou WhatsApp
+            if (confirm("Deseja baixar o Recibo em PDF desta venda agora?")) {
+                gerarReciboPDF(novaVenda);
+            }
+
+            limparFormulario();
+        }
+
+        function salvarStorage() {
+            try {
+                localStorage.setItem('rc_vendas_data', JSON.stringify(vendas));
+            } catch (e) {
+                alert("Erro ao salvar no navegador. Verifique o espaço disponível.");
+            }
+        }
+
+        function limparFormulario() {
+            document.getElementById('form-venda').reset();
+            document.getElementById('data_venda').valueAsDate = new Date();
+            document.getElementById('total_venda').value = "R$ 0,00";
+        }
+
+        function inicializarFiltrosPadrao() {
+            if (vendas.length === 0) {
+                const hoje = new Date().toISOString().split('T')[0];
+                document.getElementById('filtro_inicio').value = hoje;
+                document.getElementById('filtro_fim').value = hoje;
+                atualizarIndicadores();
+                return;
+            }
+
+            // Encontrar menor e maior data
+            const datas = vendas.map(v => v.data).sort();
+            document.getElementById('filtro_inicio').value = datas[0];
+            document.getElementById('filtro_fim').value = datas[datas.length - 1];
+            atualizarIndicadores();
+        }
+
+        function filtrarPeriodo(tipo) {
+            const hoje = new Date();
+            let inicio = new Date();
+
+            if (tipo === '7dias') {
+                inicio.setDate(hoje.getDate() - 7);
+            } else if (tipo === '15dias') {
+                inicio.setDate(hoje.getDate() - 15);
+            } else if (tipo === 'mes') {
+                inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+            } else if (tipo === 'todos') {
+                inicializarFiltrosPadrao();
+                return;
+            }
+
+            document.getElementById('filtro_inicio').value = inicio.toISOString().split('T')[0];
+            document.getElementById('filtro_fim').value = hoje.toISOString().split('T')[0];
+            atualizarIndicadores();
+        }
+
+        function getVendasFiltradas() {
+            const inicio = document.getElementById('filtro_inicio').value;
+            const fim = document.getElementById('filtro_fim').value;
+
+            return vendas.filter(v => {
+                return (!inicio || v.data >= inicio) && (!fim || v.data <= fim);
+            });
+        }
+
+        function atualizarIndicadores() {
+            const filtradas = getVendasFiltradas();
+
+            // Métricas
+            const faturamento = filtradas.reduce((acc, v) => acc + v.total, 0);
+            const totalItens = filtradas.reduce((acc, v) => acc + v.quantidade, 0);
+            const qtdVendas = filtradas.length;
+
+            document.getElementById('metric-faturamento').innerText = `R$ ${faturamento.toFixed(2)}`;
+            document.getElementById('metric-itens').innerText = totalItens;
+            document.getElementById('metric-vendas').innerText = qtdVendas;
+
+            // Agrupar Produtos
+            const prodMap = {};
+            filtradas.forEach(v => {
+                if (!prodMap[v.produto]) {
+                    prodMap[v.produto] = { qtd: 0, total: 0 };
                 }
-                
-                st.session_state.sales_data = pd.concat([
-                    st.session_state.sales_data, 
-                    pd.DataFrame([new_row])
-                ], ignore_index=True)
-                
-                st.success("Venda registrada com sucesso!")
-                
-                # Gerar PDF do Recibo Individual
-                pdf_file = generate_receipt_pdf(new_row)
-                with open(pdf_file, "rb") as f:
-                    st.download_button(
-                        label="📥 Baixar Recibo em PDF",
-                        data=f,
-                        file_name=f"recibo_{sale_id}.pdf",
-                        mime="application/pdf"
-                    )
-            else:
-                st.error("Por favor, preencha todos os campos obrigatórios corretamente.")
+                prodMap[v.produto].qtd += v.quantidade;
+                prodMap[v.produto].total += v.total;
+            });
 
-elif menu == "Indicadores e Relatórios":
-    st.header("📊 Indicadores de Entrada e Relatórios por Período")
-    
-    if st.session_state.sales_data.empty:
-        st.info("Nenhuma venda registrada até o momento.")
-    else:
-        # Filtros de Período
-        st.sidebar.subheader("Filtro de Período")
-        
-        # Converter coluna Data para datetime para filtragem
-        df_display = st.session_state.sales_data.copy()
-        df_display["Data_dt"] = pd.to_datetime(df_display["Data"])
-        
-        min_date = df_display["Data_dt"].min().date()
-        max_date = df_display["Data_dt"].max().date()
-        
-        start_date = st.sidebar.date_input("Data Inicial", value=min_date, min_value=min_date, max_value=max_date)
-        end_date = st.sidebar.date_input("Data Final", value=max_date, min_value=min_date, max_value=max_date)
-        
-        # Aplicar filtro
-        mask = (df_display["Data_dt"].dt.date >= start_date) & (df_display["Data_dt"].dt.date <= end_date)
-        df_filtered = df_display.loc[mask].copy()
-        
-        # Métricas / Indicadores de Entrada
-        col1, col2, col3 = st.columns(3)
-        total_faturamento = df_filtered["Total"].sum()
-        total_produtos_vendidos = df_filtered["Quantidade"].sum()
-        total_transacoes = len(df_filtered)
-        
-        col1.metric("Faturamento no Período", f"R$ {total_faturamento:.2f}")
-        col2.metric("Total de Itens Vendidos", int(total_produtos_vendidos))
-        col3.metric("Qtd. de Vendas", total_transacoes)
-        
-        st.markdown("---")
-        st.subheader("Lista de Vendas Filtradas")
-        st.dataframe(df_filtered.drop(columns=["Data_dt"]), use_container_width=True)
-        
-        # Geração do Relatório PDF Filtrado
-        st.markdown("### Exportar Relatório")
-        if not df_filtered.empty:
-            if st.button("Gerar Relatório em PDF"):
-                pdf_rel_path = generate_sales_report_pdf(df_filtered, start_date, end_date)
-                with open(pdf_rel_path, "rb") as f:
-                    st.download_button(
-                        label="📥 Baixar Relatório em PDF",
-                        data=f,
-                        file_name="relatorio_vendas_periodo.pdf",
-                        mime="application/pdf"
-                    )
-        else:
-            st.warning("Não há dados no período selecionado para gerar o relatório.")
+            const corpoProdutos = document.getElementById('tabela-produtos-corpo');
+            corpoProdutos.innerHTML = '';
+            if (Object.keys(prodMap).length === 0) {
+                corpoProdutos.innerHTML = `<tr><td colspan="3" class="px-4 py-3 text-center text-slate-400">Nenhum produto no período</td></tr>`;
+            } else {
+                for (let prod in prodMap) {
+                    corpoProdutos.innerHTML += `
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-4 py-2 font-medium text-slate-700">${prod}</td>
+                            <td class="px-4 py-2 text-center text-slate-600">${prodMap[prod].qtd}</td>
+                            <td class="px-4 py-2 text-right font-medium text-emerald-600">R$ ${prodMap[prod].total.toFixed(2)}</td>
+                        </tr>
+                    `;
+                }
+            }
 
+            // Agrupar Clientes
+            const cliMap = {};
+            filtradas.forEach(v => {
+                if (!cliMap[v.cliente]) {
+                    cliMap[v.cliente] = { compras: 0, total: 0 };
+                }
+                cliMap[v.cliente].compras += 1;
+                cliMap[v.cliente].total += v.total;
+            });
+
+            const corpoClientes = document.getElementById('tabela-clientes-corpo');
+            corpoClientes.innerHTML = '';
+            if (Object.keys(cliMap).length === 0) {
+                corpoClientes.innerHTML = `<tr><td colspan="3" class="px-4 py-3 text-center text-slate-400">Nenhum cliente no período</td></tr>`;
+            } else {
+                for (let cli in cliMap) {
+                    corpoClientes.innerHTML += `
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-4 py-2 font-medium text-slate-700">${cli}</td>
+                            <td class="px-4 py-2 text-center text-slate-600">${cliMap[cli].compras}</td>
+                            <td class="px-4 py-2 text-right font-medium text-blue-600">R$ ${cliMap[cli].total.toFixed(2)}</td>
+                        </tr>
+                    `;
+                }
+            }
+
+            // Tabela Histórico
+            const corpoHistorico = document.getElementById('tabela-historico-corpo');
+            corpoHistorico.innerHTML = '';
+            if (filtradas.length === 0) {
+                corpoHistorico.innerHTML = `<tr><td colspan="7" class="px-4 py-4 text-center text-slate-400">Nenhum registro encontrado no período</td></tr>`;
+            } else {
+                // Ordenar por data decrescente
+                filtradas.sort((a, b) => new Date(b.data) - new Date(a.data)).forEach(v => {
+                    const dataFormatada = v.data.split('-').reverse().join('/');
+                    corpoHistorico.innerHTML += `
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-4 py-3 text-slate-600">${dataFormatada}</td>
+                            <td class="px-4 py-3 font-medium text-slate-700">${v.cliente}</td>
+                            <td class="px-4 py-3 text-slate-600">${v.produto}</td>
+                            <td class="px-4 py-3 text-center text-slate-600">${v.quantidade}</td>
+                            <td class="px-4 py-3 text-right text-slate-600">R$ ${v.valorUnitario.toFixed(2)}</td>
+                            <td class="px-4 py-3 text-right font-bold text-emerald-600">R$ ${v.total.toFixed(2)}</td>
+                            <td class="px-4 py-3 text-center space-x-2">
+                                <button onclick="gerarReciboPDFById(${v.id})" title="Baixar Recibo PDF" class="text-blue-600 hover:text-blue-800"><i class="fa-solid fa-file-pdf"></i></button>
+                                <button onclick="compartilharWhatsApp(${v.id})" title="Enviar WhatsApp" class="text-green-600 hover:text-green-800"><i class="fa-brands fa-whatsapp"></i></button>
+                                <button onclick="excluirVenda(${v.id})" title="Excluir Venda" class="text-red-500 hover:text-red-700"><i class="fa-solid fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+        }
+
+        function excluirVenda(id) {
+            if (confirm("Deseja realmente excluir este registro de venda?")) {
+                vendas = vendas.filter(v => v.id !== id);
+                salvarStorage();
+                atualizarIndicadores();
+            }
+        }
+
+        // Geração de Recibo em PDF
+        function gerarReciboPDF(v) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(16);
+            doc.text("RC SERVIÇO E COMÉRCIO", 105, 20, { align: "center" });
+
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(10);
+            doc.text("RECIBO DE PAGAMENTO", 105, 27, { align: "center" });
+
+            doc.line(20, 32, 190, 32);
+
+            doc.setFontSize(11);
+            doc.text(`Recibo Nº: ${v.id}`, 20, 42);
+            doc.text(`Data: ${v.data.split('-').reverse().join('/')}`, 20, 50);
+
+            doc.text(`Recebemos de: ${v.cliente}`, 20, 64);
+            doc.text(`A quantia de: R$ ${v.total.toFixed(2)}`, 20, 72);
+
+            doc.text("Referente ao produto / serviço:", 20, 86);
+            doc.text(`- ${v.produto} (Qtd: ${v.quantidade} x R$ ${v.valorUnitario.toFixed(2)})`, 25, 94);
+
+            doc.line(50, 140, 160, 140);
+            doc.text("RC Serviço e Comércio", 105, 147, { align: "center" });
+            doc.text("Assinatura / Carimbo", 105, 153, { align: "center" });
+
+            doc.save(`recibo_${v.cliente}_${v.data}.pdf`);
+        }
+
+        function gerarReciboPDFById(id) {
+            const v = vendas.find(item => item.id === id);
+            if (v) gerarReciboPDF(v);
+        }
+
+        // Compartilhar WhatsApp Venda Individual
+        function compartilharWhatsApp(id) {
+            const v = vendas.find(item => item.id === id);
+            if (!v) return;
+
+            const texto = `*RC SERVIÇO E COMÉRCIO - RECIBO*` +
+                          `\n\n*Cliente:* ${v.cliente}` +
+                          `\n*Data:* ${v.data.split('-').reverse().join('/')}` +
+                          `\n*Produto:* ${v.produto}` +
+                          `\n*Quantidade:* ${v.quantidade}` +
+                          `\n*Valor Unitário:* R$ ${v.valorUnitario.toFixed(2)}` +
+                          `\n*Total:* *R$ ${v.total.toFixed(2)}*` +
+                          `\n\nObrigado pela preferência!`;
+
+            const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`;
+            window.open(url, '_blank');
+        }
+
+        // Compartilhar Resumo do Período
+        function compartilharResumoWhatsApp() {
+            const filtradas = getVendasFiltradas();
+            const inicio = document.getElementById('filtro_inicio').value.split('-').reverse().join('/');
+            const fim = document.getElementById('filtro_fim').value.split('-').reverse().join('/');
+            const faturamento = filtradas.reduce((acc, v) => acc + v.total, 0);
+            const totalItens = filtradas.reduce((acc, v) => acc + v.quantidade, 0);
+
+            const texto = `*RC SERVIÇO E COMÉRCIO - RELATÓRIO*` +
+                          `\nPeríodo: ${inicio} a ${fim}` +
+                          `\n\n*Faturamento:* R$ ${faturamento.toFixed(2)}` +
+                          `\n*Total de Itens:* ${totalItens}` +
+                          `\n*Qtd de Vendas:* ${filtradas.length}` +
+                          `\n\nGerado via Sistema RC Serviço e Comércio`;
+
+            const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`;
+            window.open(url, '_blank');
+        }
+
+        // Gerar Relatório PDF Consolidado
+        function gerarRelatorioPDF() {
+            const filtradas = getVendasFiltradas();
+            if (filtradas.length === 0) {
+                alert("Não há dados no período selecionado para gerar o relatório.");
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            const inicio = document.getElementById('filtro_inicio').value.split('-').reverse().join('/');
+            const fim = document.getElementById('filtro_fim').value.split('-').reverse().join('/');
+
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(16);
+            doc.text("RC SERVIÇO E COMÉRCIO", 105, 20, { align: "center" });
+
+            doc.setFontSize(11);
+            doc.text("Relatório Consolidado de Vendas e Produtos", 105, 27, { align: "center" });
+            doc.setFontSize(9);
+            doc.text(`Período: ${inicio} até ${fim}`, 105, 33, { align: "center" });
+
+            const tableData = filtradas.map(v => [
+                v.data.split('-').reverse().join('/'),
+                v.cliente,
+                v.produto,
+                v.quantidade,
+                `R$ ${v.valorUnitario.toFixed(2)}`,
+                `R$ ${v.total.toFixed(2)}`
+            ]);
+
+            doc.autoTable({
+                startY: 40,
+                head: [['Data', 'Cliente', 'Produto', 'Qtd', 'Unitário', 'Total']],
+                body: tableData,
+                theme: 'striped',
+                headStyles: { fillColor: [30, 58, 138] },
+                styles: { fontSize: 9 }
+            });
+
+            const faturamentoTotal = filtradas.reduce((acc, v) => acc + v.total, 0);
+            const qtdTotal = filtradas.reduce((acc, v) => acc + v.quantidade, 0);
+            const finalY = doc.lastAutoTable.finalY + 10;
+
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(10);
+            doc.text(`Total de Itens Vendidos: ${qtdTotal} | Faturamento Total: R$ ${faturamentoTotal.toFixed(2)}`, 20, finalY);
+
+            doc.save(`relatorio_vendas_${inicio}_a_${fim}.pdf`);
+        }
+    </script>
+</body>
+</html>
