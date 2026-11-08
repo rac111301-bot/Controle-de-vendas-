@@ -3,86 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RC Serviço e Comércio - Gestão de Vendas e Recibos</title>
-    <!-- Tailwind CSS para Estilização Moderna -->
+    <title>RC Gestão de Vendas - Sistema de Vendas e Recibos</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!-- FontAwesome para Ícones -->
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- jsPDF e AutoTable para Geração de PDFs -->
+    <!-- jsPDF e AutoTable -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 </head>
-<body class="bg-slate-100 text-slate-800 font-sans min-h-screen">
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col justify-between">
 
     <!-- Cabeçalho -->
-    <header class="bg-blue-900 text-white shadow-md">
+    <header class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white shadow-lg">
         <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center">
-            <div class="flex items-center space-x-3 mb-2 md:mb-0">
-                <i class="fa-solid fa-receipt text-2xl text-blue-300"></i>
+            <div class="flex items-center space-x-3 mb-3 md:mb-0">
+                <div class="p-2.5 bg-blue-600/30 rounded-xl border border-blue-400/30">
+                    <i class="fa-solid fa-file-invoice-dollar text-2xl text-blue-300"></i>
+                </div>
                 <div>
-                    <h1 class="text-xl font-bold tracking-wide">RC Serviço e Comércio</h1>
-                    <p class="text-xs text-blue-200">Sistema de Gestão de Vendas, Recibos e Relatórios</p>
+                    <h1 class="text-xl font-bold tracking-wide">RC Gestão de Vendas</h1>
+                    <p class="text-xs text-blue-200">Painel Profissional de Vendas, Recibos e Notas Avulsas</p>
                 </div>
             </div>
             <!-- Navegação por Abas -->
-            <div class="flex space-x-2">
-                <button onclick="switchTab('vendas')" id="btn-vendas" class="px-4 py-2 rounded-lg bg-blue-700 text-white font-medium text-sm transition hover:bg-blue-600 shadow">
-                    <i class="fa-solid fa-cash-register mr-1"></i> Nova Venda
+            <div class="flex flex-wrap gap-2">
+                <button onclick="switchTab('vendas')" id="btn-vendas" class="px-4 py-2 rounded-xl bg-blue-600 text-white font-medium text-sm transition hover:bg-blue-500 shadow-sm flex items-center gap-2">
+                    <i class="fa-solid fa-cart-plus"></i> Nova Venda
                 </button>
-                <button onclick="switchTab('indicadores')" id="btn-indicadores" class="px-4 py-2 rounded-lg bg-blue-800 text-blue-100 font-medium text-sm transition hover:bg-blue-700">
-                    <i class="fa-solid fa-chart-pie mr-1"></i> Indicadores & Relatórios
+                <button onclick="switchTab('nota-avulsa')" id="btn-nota-avulsa" class="px-4 py-2 rounded-xl bg-blue-800/80 text-blue-100 font-medium text-sm transition hover:bg-blue-700 flex items-center gap-2 border border-blue-700/50">
+                    <i class="fa-solid fa-file-pen"></i> Nota Avulsa
+                </button>
+                <button onclick="switchTab('indicadores')" id="btn-indicadores" class="px-4 py-2 rounded-xl bg-blue-800/80 text-blue-100 font-medium text-sm transition hover:bg-blue-700 flex items-center gap-2 border border-blue-700/50">
+                    <i class="fa-solid fa-chart-pie"></i> Indicadores
                 </button>
             </div>
         </div>
     </header>
 
     <!-- Conteúdo Principal -->
-    <main class="max-w-7xl mx-auto px-4 py-6">
+    <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full">
 
         <!-- ABA 1: NOVA VENDA / REGISTRO -->
         <section id="tab-vendas" class="space-y-6">
-            <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-200 max-w-2xl mx-auto">
-                <h2 class="text-lg font-bold text-slate-700 mb-4 pb-2 border-b border-slate-100">
-                    <i class="fa-solid fa-cart-plus text-blue-600 mr-2"></i> Registrar Nova Venda / Serviço
-                </h2>
+            <div class="bg-white rounded-2xl shadow-sm p-6 md:p-8 border border-slate-200 max-w-2xl mx-auto">
+                <div class="flex items-center gap-3 mb-6 pb-3 border-b border-slate-100">
+                    <div class="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                        <i class="fa-solid fa-cash-register text-lg"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800">Registrar Nova Venda</h2>
+                        <p class="text-xs text-slate-500">Lançamento oficial para controle de faturamento e estoque</p>
+                    </div>
+                </div>
 
                 <form id="form-venda" onsubmit="salvarVenda(event)" class="space-y-4">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-slate-600 mb-1">Nome do Cliente *</label>
-                            <input type="text" id="cliente" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Nome do Cliente *</label>
+                            <input type="text" id="cliente" required class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-slate-600 mb-1">Produto / Serviço *</label>
-                            <input type="text" id="produto" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="Ex: Salgados, Manutenção...">
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Produto / Serviço *</label>
+                            <input type="text" id="produto" required class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm" placeholder="Ex: Salgados, Instalação...">
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-slate-600 mb-1">Quantidade *</label>
-                            <input type="number" id="quantidade" min="1" value="1" required oninput="calcularTotal()" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Quantidade *</label>
+                            <input type="number" id="quantidade" min="1" value="1" required oninput="calcularTotal()" class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-slate-600 mb-1">Valor Unitário (R$) *</label>
-                            <input type="number" id="valor_unitario" step="0.01" min="0.01" value="0.00" required oninput="calcularTotal()" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Valor Unitário (R$) *</label>
+                            <input type="number" id="valor_unitario" step="0.01" min="0.01" value="0.00" required oninput="calcularTotal()" class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-slate-600 mb-1">Total (R$)</label>
-                            <input type="text" id="total_venda" readonly class="w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-slate-700 font-bold text-sm">
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Total (R$)</label>
+                            <input type="text" id="total_venda" readonly class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-700 font-bold text-sm">
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-slate-600 mb-1">Data da Venda *</label>
-                        <input type="date" id="data_venda" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Data da Venda *</label>
+                        <input type="date" id="data_venda" required class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm">
                     </div>
 
-                    <div class="pt-2 flex flex-col sm:flex-row gap-3">
-                        <button type="submit" class="flex-1 bg-blue-600 text-white font-medium py-2.5 px-4 rounded-lg hover:bg-blue-700 transition shadow text-sm">
-                            <i class="fa-solid fa-floppy-disk mr-1"></i> Salvar Venda
+                    <div class="pt-3 flex flex-col sm:flex-row gap-3">
+                        <button type="submit" class="flex-1 bg-blue-600 text-white font-medium py-3 px-4 rounded-xl hover:bg-blue-700 transition shadow-sm text-sm flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-floppy-disk"></i> Salvar e Registrar Venda
                         </button>
-                        <button type="button" onclick="limparFormulario()" class="bg-slate-200 text-slate-700 font-medium py-2.5 px-4 rounded-lg hover:bg-slate-300 transition text-sm">
+                        <button type="button" onclick="limparFormulario()" class="bg-slate-100 text-slate-700 font-medium py-3 px-4 rounded-xl hover:bg-slate-200 transition text-sm">
                             Limpar
                         </button>
                     </div>
@@ -90,123 +101,187 @@
             </div>
         </section>
 
-        <!-- ABA 2: INDICADORES E RELATÓRIOS -->
+        <!-- ABA 2: NOTA AVULSA CORPORATIVA -->
+        <section id="tab-nota-avulsa" class="hidden space-y-6">
+            <div class="bg-white rounded-2xl shadow-sm p-6 md:p-8 border border-slate-200 max-w-2xl mx-auto">
+                <div class="flex items-center gap-3 mb-6 pb-3 border-b border-slate-100">
+                    <div class="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
+                        <i class="fa-solid fa-file-shield text-lg"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800">Emissão de Nota / Recibo Avulso</h2>
+                        <p class="text-xs text-slate-500">Gere um documento corporativo formal sem afetar o faturamento automático</p>
+                    </div>
+                </div>
+
+                <form id="form-nota-avulsa" onsubmit="gerarNotaAvulsaPDF(event)" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Nome do Cliente *</label>
+                            <input type="text" id="avulso_cliente" required class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600 text-sm" placeholder="Nome completo ou empresa">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">CPF / CNPJ do Cliente</label>
+                            <input type="text" id="avulso_doc" class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600 text-sm" placeholder="Opcional">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Descrição do Serviço / Produto *</label>
+                            <input type="text" id="avulso_descricao" required class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600 text-sm" placeholder="Ex: Manutenção de Equipamento / Fornecimento">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Valor Total (R$) *</label>
+                            <input type="number" id="avulso_valor" step="0.01" min="0.01" required class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600 text-sm" placeholder="0,00">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Forma de Pagamento *</label>
+                            <select id="avulso_pagamento" class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600 text-sm bg-white">
+                                <option value="Pix">Pix</option>
+                                <option value="Dinheiro">Dinheiro</option>
+                                <option value="Cartão de Crédito">Cartão de Crédito</option>
+                                <option value="Cartão de Débito">Cartão de Débito</option>
+                                <option value="Transferência Bancária">Transferência Bancária</option>
+                                <option value="Faturado / Boleto">Faturado / Boleto</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Data de Emissão *</label>
+                            <input type="date" id="avulso_data" required class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600 text-sm">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Observações / Condições (Opcional)</label>
+                        <textarea id="avulso_obs" rows="2" class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600 text-sm" placeholder="Garantia, prazos ou instruções adicionais..."></textarea>
+                    </div>
+
+                    <div class="pt-3 flex gap-3">
+                        <button type="submit" class="flex-1 bg-emerald-600 text-white font-medium py-3 px-4 rounded-xl hover:bg-emerald-700 transition shadow-sm text-sm flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-file-pdf"></i> Gerar Nota Avulsa em PDF Corporativo
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- ABA 3: INDICADORES E RELATÓRIOS -->
         <section id="tab-indicadores" class="hidden space-y-6">
             
             <!-- Barra de Filtros e Atalhos -->
-            <div class="bg-white rounded-xl shadow-sm p-4 border border-slate-200 flex flex-col lg:flex-row justify-between items-center gap-4">
+            <div class="bg-white rounded-2xl shadow-sm p-4 border border-slate-200 flex flex-col lg:flex-row justify-between items-center gap-4">
                 <div class="flex flex-wrap gap-2 items-center w-full lg:w-auto">
-                    <span class="text-sm font-medium text-slate-600 mr-2"><i class="fa-solid fa-filter mr-1"></i> Atalhos:</span>
-                    <button onclick="filtrarPeriodo('7dias')" class="px-3 py-1.5 text-xs bg-slate-100 hover:bg-blue-50 hover:text-blue-600 font-medium rounded-lg border border-slate-200 transition">Últimos 7 Dias</button>
-                    <button onclick="filtrarPeriodo('15dias')" class="px-3 py-1.5 text-xs bg-slate-100 hover:bg-blue-50 hover:text-blue-600 font-medium rounded-lg border border-slate-200 transition">Últimos 15 Dias</button>
-                    <button onclick="filtrarPeriodo('mes')" class="px-3 py-1.5 text-xs bg-slate-100 hover:bg-blue-50 hover:text-blue-600 font-medium rounded-lg border border-slate-200 transition">Este Mês</button>
-                    <button onclick="filtrarPeriodo('todos')" class="px-3 py-1.5 text-xs bg-slate-100 hover:bg-blue-50 hover:text-blue-600 font-medium rounded-lg border border-slate-200 transition">Tudo</button>
+                    <span class="text-xs font-semibold uppercase text-slate-600 mr-2"><i class="fa-solid fa-filter mr-1"></i> Período:</span>
+                    <button onclick="filtrarPeriodo('7dias')" class="px-3 py-1.5 text-xs bg-slate-100 hover:bg-blue-50 hover:text-blue-600 font-medium rounded-xl border border-slate-200 transition">Últimos 7 Dias</button>
+                    <button onclick="filtrarPeriodo('15dias')" class="px-3 py-1.5 text-xs bg-slate-100 hover:bg-blue-50 hover:text-blue-600 font-medium rounded-xl border border-slate-200 transition">Últimos 15 Dias</button>
+                    <button onclick="filtrarPeriodo('mes')" class="px-3 py-1.5 text-xs bg-slate-100 hover:bg-blue-50 hover:text-blue-600 font-medium rounded-xl border border-slate-200 transition">Este Mês</button>
+                    <button onclick="filtrarPeriodo('todos')" class="px-3 py-1.5 text-xs bg-slate-100 hover:bg-blue-50 hover:text-blue-600 font-medium rounded-xl border border-slate-200 transition">Tudo</button>
                 </div>
                 
                 <div class="flex items-center gap-2 w-full lg:w-auto justify-end">
                     <div>
-                        <label class="text-xs text-slate-500 block">De:</label>
-                        <input type="date" id="filtro_inicio" onchange="atualizarIndicadores()" class="px-2 py-1 text-xs border border-slate-300 rounded-lg">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase block">De:</label>
+                        <input type="date" id="filtro_inicio" onchange="atualizarIndicadores()" class="px-2.5 py-1 text-xs border border-slate-300 rounded-lg">
                     </div>
                     <div>
-                        <label class="text-xs text-slate-500 block">Até:</label>
-                        <input type="date" id="filtro_fim" onchange="atualizarIndicadores()" class="px-2 py-1 text-xs border border-slate-300 rounded-lg">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase block">Até:</label>
+                        <input type="date" id="filtro_fim" onchange="atualizarIndicadores()" class="px-2.5 py-1 text-xs border border-slate-300 rounded-lg">
                     </div>
                 </div>
             </div>
 
             <!-- Cards de Métricas -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
                     <div>
-                        <p class="text-xs text-slate-500 font-medium uppercase tracking-wider">Faturamento no Período</p>
+                        <p class="text-xs text-slate-500 font-bold uppercase tracking-wider">Faturamento Total</p>
                         <h3 id="metric-faturamento" class="text-2xl font-bold text-slate-800 mt-1">R$ 0,00</h3>
                     </div>
-                    <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl text-xl">
-                        <i class="fa-solid fa-dollar-sign"></i>
+                    <div class="p-3 bg-emerald-50 text-emerald-600 rounded-2xl text-xl">
+                        <i class="fa-solid fa-chart-line"></i>
                     </div>
                 </div>
 
-                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
                     <div>
-                        <p class="text-xs text-slate-500 font-medium uppercase tracking-wider">Total de Itens/Salgados</p>
+                        <p class="text-xs text-slate-500 font-bold uppercase tracking-wider">Total de Itens</p>
                         <h3 id="metric-itens" class="text-2xl font-bold text-slate-800 mt-1">0</h3>
                     </div>
-                    <div class="p-3 bg-blue-50 text-blue-600 rounded-xl text-xl">
-                        <i class="fa-solid fa-box-open"></i>
+                    <div class="p-3 bg-blue-50 text-blue-600 rounded-2xl text-xl">
+                        <i class="fa-solid fa-boxes-stacked"></i>
                     </div>
                 </div>
 
-                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
                     <div>
-                        <p class="text-xs text-slate-500 font-medium uppercase tracking-wider">Qtd. de Vendas</p>
+                        <p class="text-xs text-slate-500 font-bold uppercase tracking-wider">Vendas Realizadas</p>
                         <h3 id="metric-vendas" class="text-2xl font-bold text-slate-800 mt-1">0</h3>
                     </div>
-                    <div class="p-3 bg-indigo-50 text-indigo-600 rounded-xl text-xl">
+                    <div class="p-3 bg-indigo-50 text-indigo-600 rounded-2xl text-xl">
                         <i class="fa-solid fa-receipt"></i>
                     </div>
                 </div>
             </div>
 
             <!-- Ações de Relatório -->
-            <div class="flex justify-end gap-3">
-                <button onclick="gerarRelatorioPDF()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-4 py-2 rounded-lg text-sm transition shadow flex items-center gap-2">
-                    <i class="fa-solid fa-file-pdf"></i> Baixar Relatório em PDF
+            <div class="flex justify-end gap-3 flex-wrap">
+                <button onclick="gerarRelatorioPDF()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-4 py-2.5 rounded-xl text-sm transition shadow-sm flex items-center gap-2">
+                    <i class="fa-solid fa-file-pdf"></i> Baixar Relatório Consolidado (PDF)
                 </button>
-                <button onclick="compartilharResumoWhatsApp()" class="bg-green-600 hover:bg-green-700 text-white font-medium px-4 py-2 rounded-lg text-sm transition shadow flex items-center gap-2">
-                    <i class="fa-brands fa-whatsapp"></i> Compartilhar Resumo (WhatsApp)
+                <button onclick="compartilharResumoWhatsApp()" class="bg-green-600 hover:bg-green-700 text-white font-medium px-4 py-2.5 rounded-xl text-sm transition shadow-sm flex items-center gap-2">
+                    <i class="fa-brands fa-whatsapp"></i> Compartilhar Resumo no WhatsApp
                 </button>
             </div>
 
-            <!-- Resumo por Produtos e Clientes -->
+            <!-- Resumos Lado a Lado -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Tabela de Produtos Vendidos -->
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="px-5 py-3 bg-slate-50 border-b border-slate-200">
-                        <h3 class="font-bold text-slate-700 text-sm"><i class="fa-solid fa-basket-shopping text-blue-600 mr-2"></i> Produtos / Salgados no Período</h3>
+                <!-- Tabela de Produtos -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="px-5 py-3.5 bg-slate-50 border-b border-slate-200">
+                        <h3 class="font-bold text-slate-700 text-sm"><i class="fa-solid fa-box text-blue-600 mr-2"></i> Produtos / Serviços no Período</h3>
                     </div>
                     <div class="overflow-x-auto max-h-64">
                         <table class="w-full text-left text-sm">
                             <thead class="bg-slate-100 text-slate-600 text-xs uppercase sticky top-0">
                                 <tr>
-                                    <th class="px-4 py-2">Produto</th>
-                                    <th class="px-4 py-2 text-center">Qtd Total</th>
-                                    <th class="px-4 py-2 text-right">Valor Total</th>
+                                    <th class="px-4 py-2.5">Item</th>
+                                    <th class="px-4 py-2.5 text-center">Qtd</th>
+                                    <th class="px-4 py-2.5 text-right">Total</th>
                                 </tr>
                             </thead>
-                            <tbody id="tabela-produtos-corpo" class="divide-y divide-slate-100">
-                                <!-- Preenchido via JS -->
-                            </tbody>
+                            <tbody id="tabela-produtos-corpo" class="divide-y divide-slate-100"></tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- Tabela por Clientes -->
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="px-5 py-3 bg-slate-50 border-b border-slate-200">
-                        <h3 class="font-bold text-slate-700 text-sm"><i class="fa-solid fa-users text-blue-600 mr-2"></i> Resumo por Cliente no Período</h3>
+                <!-- Tabela Clientes -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="px-5 py-3.5 bg-slate-50 border-b border-slate-200">
+                        <h3 class="font-bold text-slate-700 text-sm"><i class="fa-solid fa-users text-blue-600 mr-2"></i> Resumo por Cliente</h3>
                     </div>
                     <div class="overflow-x-auto max-h-64">
                         <table class="w-full text-left text-sm">
                             <thead class="bg-slate-100 text-slate-600 text-xs uppercase sticky top-0">
                                 <tr>
-                                    <th class="px-4 py-2">Cliente</th>
-                                    <th class="px-4 py-2 text-center">Compras</th>
-                                    <th class="px-4 py-2 text-right">Total Gasto</th>
+                                    <th class="px-4 py-2.5">Cliente</th>
+                                    <th class="px-4 py-2.5 text-center">Pedidos</th>
+                                    <th class="px-4 py-2.5 text-right">Total Gasto</th>
                                 </tr>
                             </thead>
-                            <tbody id="tabela-clientes-corpo" class="divide-y divide-slate-100">
-                                <!-- Preenchido via JS -->
-                            </tbody>
+                            <tbody id="tabela-clientes-corpo" class="divide-y divide-slate-100"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- Tabela de Histórico Detalhado -->
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="px-5 py-3 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
-                    <h3 class="font-bold text-slate-700 text-sm"><i class="fa-solid fa-list text-blue-600 mr-2"></i> Histórico de Vendas Filtradas</h3>
+            <!-- Tabela Histórico -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="px-5 py-3.5 bg-slate-50 border-b border-slate-200">
+                    <h3 class="font-bold text-slate-700 text-sm"><i class="fa-solid fa-list text-blue-600 mr-2"></i> Histórico Detalhado de Vendas</h3>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm">
@@ -221,9 +296,7 @@
                                 <th class="px-4 py-3 text-center">Ações</th>
                             </tr>
                         </thead>
-                        <tbody id="tabela-historico-corpo" class="divide-y divide-slate-100">
-                            <!-- Preenchido via JS -->
-                        </tbody>
+                        <tbody id="tabela-historico-corpo" class="divide-y divide-slate-100"></tbody>
                     </table>
                 </div>
             </div>
@@ -232,41 +305,36 @@
 
     </main>
 
-    <!-- Script de Funcionalidades -->
-    <script>
-        // Inicializar data atual no formulário
-        document.getElementById('data_venda').valueAsDate = new Date();
+    <!-- Rodapé -->
+    <footer class="bg-white border-t border-slate-200 mt-12 py-4 text-center text-xs text-slate-500">
+        RC Gestão de Vendas &copy; 2026 - Todos os direitos reservados.
+    </footer>
 
-        // Carregar banco de dados do localStorage com tratamento de erro
+    <!-- Script JavaScript -->
+    <script>
+        document.getElementById('data_venda').valueAsDate = new Date();
+        document.getElementById('avulso_data').valueAsDate = new Date();
+
         let vendas = [];
         try {
-            const stored = localStorage.getItem('rc_vendas_data');
-            if (stored) {
-                vendas = JSON.parse(stored);
-            }
+            const stored = localStorage.getItem('rc_gestao_vendas_data');
+            if (stored) vendas = JSON.parse(stored);
         } catch (e) {
-            console.error("Erro ao carregar vendas do localStorage", e);
+            console.error("Erro ao carregar dados", e);
             vendas = [];
         }
 
-        // Alternar Abas
         function switchTab(tab) {
-            const tabVendas = document.getElementById('tab-vendas');
-            const tabIndicadores = document.getElementById('tab-indicadores');
-            const btnVendas = document.getElementById('btn-vendas');
-            const btnIndicadores = document.getElementById('btn-indicadores');
+            const tabs = ['vendas', 'nota-avulsa', 'indicadores'];
+            tabs.forEach(t => {
+                document.getElementById(`tab-${t}`).classList.add('hidden');
+                document.getElementById(`btn-${t}`).className = "px-4 py-2 rounded-xl bg-blue-800/80 text-blue-100 font-medium text-sm transition hover:bg-blue-700 border border-blue-700/50 flex items-center gap-2";
+            });
 
-            if (tab === 'vendas') {
-                tabVendas.classList.remove('hidden');
-                tabIndicadores.classList.add('hidden');
-                btnVendas.className = "px-4 py-2 rounded-lg bg-blue-700 text-white font-medium text-sm transition shadow";
-                btnIndicadores.className = "px-4 py-2 rounded-lg bg-blue-800 text-blue-100 font-medium text-sm transition hover:bg-blue-700";
-            } else {
-                tabVendas.classList.add('hidden');
-                tabIndicadores.classList.remove('hidden');
-                btnIndicadores.className = "px-4 py-2 rounded-lg bg-blue-700 text-white font-medium text-sm transition shadow";
-                btnVendas.className = "px-4 py-2 rounded-lg bg-blue-800 text-blue-100 font-medium text-sm transition hover:bg-blue-700";
-                
+            document.getElementById(`tab-${tab}`).classList.remove('hidden');
+            document.getElementById(`btn-${tab}`).className = "px-4 py-2 rounded-xl bg-blue-600 text-white font-medium text-sm transition shadow-sm flex items-center gap-2";
+
+            if (tab === 'indicadores') {
                 inicializarFiltrosPadrao();
             }
         }
@@ -274,47 +342,36 @@
         function calcularTotal() {
             const qtd = parseFloat(document.getElementById('quantidade').value) || 0;
             const unit = parseFloat(document.getElementById('valor_unitario').value) || 0;
-            const total = qtd * unit;
-            document.getElementById('total_venda').value = `R$ ${total.toFixed(2)}`;
+            document.getElementById('total_venda').value = `R$ ${(qtd * unit).toFixed(2)}`;
         }
 
         function salvarVenda(event) {
             event.preventDefault();
-
-            const cliente = document.getElementById('cliente').value.trim();
-            const produto = document.getElementById('produto').value.trim();
-            const quantidade = parseInt(document.getElementById('quantidade').value);
-            const valorUnitario = parseFloat(document.getElementById('valor_unitario').value);
-            const dataVenda = document.getElementById('data_venda').value;
-
             const novaVenda = {
                 id: Date.now(),
-                data: dataVenda,
-                cliente: cliente,
-                produto: produto,
-                quantidade: quantidade,
-                valorUnitario: valorUnitario,
-                total: quantidade * valorUnitario
+                data: document.getElementById('data_venda').value,
+                cliente: document.getElementById('cliente').value.trim(),
+                produto: document.getElementById('produto').value.trim(),
+                quantidade: parseInt(document.getElementById('quantidade').value),
+                valorUnitario: parseFloat(document.getElementById('valor_unitario').value),
+                total: parseInt(document.getElementById('quantidade').value) * parseFloat(document.getElementById('valor_unitario').value)
             };
 
             vendas.push(novaVenda);
             salvarStorage();
-
             alert("Venda registrada com sucesso!");
             
-            // Perguntar se deseja gerar o recibo em PDF ou WhatsApp
-            if (confirm("Deseja baixar o Recibo em PDF desta venda agora?")) {
+            if (confirm("Deseja gerar o Recibo Corporativo em PDF desta venda agora?")) {
                 gerarReciboPDF(novaVenda);
             }
-
             limparFormulario();
         }
 
         function salvarStorage() {
             try {
-                localStorage.setItem('rc_vendas_data', JSON.stringify(vendas));
+                localStorage.setItem('rc_gestao_vendas_data', JSON.stringify(vendas));
             } catch (e) {
-                alert("Erro ao salvar no navegador. Verifique o espaço disponível.");
+                alert("Erro ao salvar no armazenamento local.");
             }
         }
 
@@ -322,6 +379,197 @@
             document.getElementById('form-venda').reset();
             document.getElementById('data_venda').valueAsDate = new Date();
             document.getElementById('total_venda').value = "R$ 0,00";
+        }
+
+        // GERAR NOTA AVULSA CORPORATIVA EM PDF
+        function gerarNotaAvulsaPDF(event) {
+            event.preventDefault();
+
+            const cliente = document.getElementById('avulso_cliente').value.trim();
+            const docCli = document.getElementById('avulso_doc').value.trim();
+            const descricao = document.getElementById('avulso_descricao').value.trim();
+            const valor = parseFloat(document.getElementById('avulso_valor').value) || 0;
+            const pagamento = document.getElementById('avulso_pagamento').value;
+            const data = document.getElementById('avulso_data').value.split('-').reverse().join('/');
+            const obs = document.getElementById('avulso_obs').value.trim();
+            const notaId = Math.floor(100000 + Math.random() * 900000);
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Cabeçalho Corporativo com Cores Vibrantes (Azul Royal e Detalhes)
+            doc.setFillColor(30, 58, 138); // Azul Royal Profundo
+            doc.rect(0, 0, 210, 35, "F");
+
+            doc.setTextColor(255, 255, 255);
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(18);
+            doc.text("RC GESTÃO DE VENDAS", 14, 20);
+
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(10);
+            doc.text("NOTA / RECIBO AVULSO CORPORATIVO", 14, 27);
+
+            doc.text(`Nota Nº: ${notaId}`, 180, 20, { align: "right" });
+            doc.text(`Data: ${data}`, 180, 27, { align: "right" });
+
+            // Bloco de Dados do Cliente
+            doc.setTextColor(50, 50, 50);
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(11);
+            doc.text("DADOS DO CLIENTE:", 14, 48);
+
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(10);
+            doc.text(`Nome / Razão Social: ${cliente}`, 14, 56);
+            if (docCli) {
+                doc.text(`CPF / CNPJ: ${docCli}`, 14, 63);
+            }
+
+            doc.setDrawColor(200, 200, 200);
+            doc.line(14, 70, 196, 70);
+
+            // Tabela de Serviço / Produto
+            doc.autoTable({
+                startY: 76,
+                head: [['Descrição do Item / Serviço', 'Forma de Pagamento', 'Valor Total']],
+                body: [[descricao, pagamento, `R$ ${valor.toFixed(2)}`]],
+                theme: 'striped',
+                headStyles: { fillColor: [30, 58, 138], textColor: [255, 255, 255], fontStyle: 'bold' },
+                styles: { fontSize: 10, cellPadding: 8 }
+            });
+
+            let finalY = doc.lastAutoTable.finalY + 15;
+
+            if (obs) {
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(10);
+                doc.text("Observações:", 14, finalY);
+                doc.setFont("helvetica", "normal");
+                doc.text(obs, 14, finalY + 7);
+                finalY += 20;
+            }
+
+            // Destaque do Valor Total
+            doc.setFillColor(241, 245, 249);
+            doc.roundedRect(120, finalY, 76, 18, 3, 3, "F");
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(11);
+            doc.setTextColor(30, 58, 138);
+            doc.text(`VALOR TOTAL: R$ ${valor.toFixed(2)}`, 158, finalY + 12, { align: "center" });
+
+            // Assinatura
+            finalY += 45;
+            doc.setDrawColor(100, 100, 100);
+            doc.line(60, finalY, 150, finalY);
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(10);
+            doc.setTextColor(50, 50, 50);
+            doc.text("RC Gestão de Vendas", 105, finalY + 6, { align: "center" });
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(9);
+            doc.text("Assinatura / Carimbo Autorizado", 105, finalY + 12, { align: "center" });
+
+            doc.save(`nota_avulsa_${cliente.replace(/\s+/g, '_')}.pdf`);
+            alert("Nota avulsa gerada com sucesso!");
+            document.getElementById('form-nota-avulsa').reset();
+            document.getElementById('avulso_data').valueAsDate = new Date();
+        }
+
+        // RECIBO CORPORATIVO DE VENDA CADASTRADA
+        function gerarReciboPDF(v) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.setFillColor(30, 58, 138);
+            doc.rect(0, 0, 210, 35, "F");
+
+            doc.setTextColor(255, 255, 255);
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(18);
+            doc.text("RC GESTÃO DE VENDAS", 14, 20);
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(10);
+            doc.text("COMPROVANTE DE PAGAMENTO / RECIBO", 14, 27);
+
+            doc.text(`Recibo Nº: ${v.id}`, 180, 20, { align: "right" });
+            doc.text(`Data: ${v.data.split('-').reverse().join('/')}`, 180, 27, { align: "right" });
+
+            doc.setTextColor(50, 50, 50);
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(11);
+            doc.text(`CLIENTE: ${v.cliente}`, 14, 48);
+
+            doc.setDrawColor(200, 200, 200);
+            doc.line(14, 55, 196, 55);
+
+            doc.autoTable({
+                startY: 62,
+                head: [['Qtd', 'Produto / Serviço', 'Valor Unitário', 'Total']],
+                body: [[v.quantidade, v.produto, `R$ ${v.valorUnitario.toFixed(2)}`, `R$ ${v.total.toFixed(2)}`]],
+                theme: 'striped',
+                headStyles: { fillColor: [30, 58, 138], textColor: [255, 255, 255], fontStyle: 'bold' },
+                styles: { fontSize: 10, cellPadding: 8 }
+            });
+
+            let finalY = doc.lastAutoTable.finalY + 20;
+
+            doc.setFillColor(241, 245, 249);
+            doc.roundedRect(120, finalY, 76, 18, 3, 3, "F");
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(11);
+            doc.setTextColor(30, 58, 138);
+            doc.text(`TOTAL PAGO: R$ ${v.total.toFixed(2)}`, 158, finalY + 12, { align: "center" });
+
+            finalY += 50;
+            doc.setDrawColor(100, 100, 100);
+            doc.line(60, finalY, 150, finalY);
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(10);
+            doc.setTextColor(50, 50, 50);
+            doc.text("RC Gestão de Vendas", 105, finalY + 6, { align: "center" });
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(9);
+            doc.text("Assinatura / Carimbo Autorizado", 105, finalY + 12, { align: "center" });
+
+            doc.save(`recibo_${v.cliente}_${v.data}.pdf`);
+        }
+
+        function gerarReciboPDFById(id) {
+            const v = vendas.find(item => item.id === id);
+            if (v) gerarReciboPDF(v);
+        }
+
+        function compartilharWhatsApp(id) {
+            const v = vendas.find(item => item.id === id);
+            if (!v) return;
+
+            const texto = `*RC GESTÃO DE VENDAS - RECIBO*` +
+                          `\n\n*Cliente:* ${v.cliente}` +
+                          `\n*Data:* ${v.data.split('-').reverse().join('/')}` +
+                          `\n*Produto:* ${v.produto}` +
+                          `\n*Qtd:* ${v.quantidade}` +
+                          `\n*Total:* *R$ ${v.total.toFixed(2)}*` +
+                          `\n\nAgradecemos a preferência!`;
+
+            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`, '_blank');
+        }
+
+        function compartilharResumoWhatsApp() {
+            const filtradas = getVendasFiltradas();
+            const inicio = document.getElementById('filtro_inicio').value.split('-').reverse().join('/');
+            const fim = document.getElementById('filtro_fim').value.split('-').reverse().join('/');
+            const faturamento = filtradas.reduce((acc, v) => acc + v.total, 0);
+            const totalItens = filtradas.reduce((acc, v) => acc + v.quantidade, 0);
+
+            const texto = `*RC GESTÃO DE VENDAS - RELATÓRIO*` +
+                          `\nPeríodo: ${inicio} a ${fim}` +
+                          `\n\n*Faturamento:* R$ ${faturamento.toFixed(2)}` +
+                          `\n*Total de Itens:* ${totalItens}` +
+                          `\n*Qtd de Vendas:* ${filtradas.length}` +
+                          `\n\nEmitido via RC Gestão de Vendas`;
+
+            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`, '_blank');
         }
 
         function inicializarFiltrosPadrao() {
@@ -332,8 +580,6 @@
                 atualizarIndicadores();
                 return;
             }
-
-            // Encontrar menor e maior data
             const datas = vendas.map(v => v.data).sort();
             document.getElementById('filtro_inicio').value = datas[0];
             document.getElementById('filtro_fim').value = datas[datas.length - 1];
@@ -344,16 +590,10 @@
             const hoje = new Date();
             let inicio = new Date();
 
-            if (tipo === '7dias') {
-                inicio.setDate(hoje.getDate() - 7);
-            } else if (tipo === '15dias') {
-                inicio.setDate(hoje.getDate() - 15);
-            } else if (tipo === 'mes') {
-                inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-            } else if (tipo === 'todos') {
-                inicializarFiltrosPadrao();
-                return;
-            }
+            if (tipo === '7dias') inicio.setDate(hoje.getDate() - 7);
+            else if (tipo === '15dias') inicio.setDate(hoje.getDate() - 15);
+            else if (tipo === 'mes') inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+            else if (tipo === 'todos') { inicializarFiltrosPadrao(); return; }
 
             document.getElementById('filtro_inicio').value = inicio.toISOString().split('T')[0];
             document.getElementById('filtro_fim').value = hoje.toISOString().split('T')[0];
@@ -363,208 +603,107 @@
         function getVendasFiltradas() {
             const inicio = document.getElementById('filtro_inicio').value;
             const fim = document.getElementById('filtro_fim').value;
-
-            return vendas.filter(v => {
-                return (!inicio || v.data >= inicio) && (!fim || v.data <= fim);
-            });
+            return vendas.filter(v => (!inicio || v.data >= inicio) && (!fim || v.data <= fim));
         }
 
         function atualizarIndicadores() {
             const filtradas = getVendasFiltradas();
-
-            // Métricas
             const faturamento = filtradas.reduce((acc, v) => acc + v.total, 0);
             const totalItens = filtradas.reduce((acc, v) => acc + v.quantidade, 0);
-            const qtdVendas = filtradas.length;
 
             document.getElementById('metric-faturamento').innerText = `R$ ${faturamento.toFixed(2)}`;
             document.getElementById('metric-itens').innerText = totalItens;
-            document.getElementById('metric-vendas').innerText = qtdVendas;
+            document.getElementById('metric-vendas').innerText = filtradas.length;
 
-            // Agrupar Produtos
+            // Produtos
             const prodMap = {};
             filtradas.forEach(v => {
-                if (!prodMap[v.produto]) {
-                    prodMap[v.produto] = { qtd: 0, total: 0 };
-                }
+                if (!prodMap[v.produto]) prodMap[v.produto] = { qtd: 0, total: 0 };
                 prodMap[v.produto].qtd += v.quantidade;
                 prodMap[v.produto].total += v.total;
             });
 
             const corpoProdutos = document.getElementById('tabela-produtos-corpo');
-            corpoProdutos.innerHTML = '';
-            if (Object.keys(prodMap).length === 0) {
-                corpoProdutos.innerHTML = `<tr><td colspan="3" class="px-4 py-3 text-center text-slate-400">Nenhum produto no período</td></tr>`;
-            } else {
-                for (let prod in prodMap) {
-                    corpoProdutos.innerHTML += `
-                        <tr class="hover:bg-slate-50">
-                            <td class="px-4 py-2 font-medium text-slate-700">${prod}</td>
-                            <td class="px-4 py-2 text-center text-slate-600">${prodMap[prod].qtd}</td>
-                            <td class="px-4 py-2 text-right font-medium text-emerald-600">R$ ${prodMap[prod].total.toFixed(2)}</td>
-                        </tr>
-                    `;
-                }
-            }
+            corpoProdutos.innerHTML = Object.keys(prodMap).length === 0 
+                ? `<tr><td colspan="3" class="px-4 py-4 text-center text-slate-400">Nenhum produto no período</td></tr>`
+                : Object.keys(prodMap).map(prod => `
+                    <tr class="hover:bg-slate-50">
+                        <td class="px-4 py-2.5 font-medium text-slate-700">${prod}</td>
+                        <td class="px-4 py-2.5 text-center text-slate-600">${prodMap[prod].qtd}</td>
+                        <td class="px-4 py-2.5 text-right font-semibold text-emerald-600">R$ ${prodMap[prod].total.toFixed(2)}</td>
+                    </tr>
+                `).join('');
 
-            // Agrupar Clientes
+            // Clientes
             const cliMap = {};
             filtradas.forEach(v => {
-                if (!cliMap[v.cliente]) {
-                    cliMap[v.cliente] = { compras: 0, total: 0 };
-                }
+                if (!cliMap[v.cliente]) cliMap[v.cliente] = { compras: 0, total: 0 };
                 cliMap[v.cliente].compras += 1;
                 cliMap[v.cliente].total += v.total;
             });
 
             const corpoClientes = document.getElementById('tabela-clientes-corpo');
-            corpoClientes.innerHTML = '';
-            if (Object.keys(cliMap).length === 0) {
-                corpoClientes.innerHTML = `<tr><td colspan="3" class="px-4 py-3 text-center text-slate-400">Nenhum cliente no período</td></tr>`;
-            } else {
-                for (let cli in cliMap) {
-                    corpoClientes.innerHTML += `
-                        <tr class="hover:bg-slate-50">
-                            <td class="px-4 py-2 font-medium text-slate-700">${cli}</td>
-                            <td class="px-4 py-2 text-center text-slate-600">${cliMap[cli].compras}</td>
-                            <td class="px-4 py-2 text-right font-medium text-blue-600">R$ ${cliMap[cli].total.toFixed(2)}</td>
-                        </tr>
-                    `;
-                }
-            }
+            corpoClientes.innerHTML = Object.keys(cliMap).length === 0
+                ? `<tr><td colspan="3" class="px-4 py-4 text-center text-slate-400">Nenhum cliente no período</td></tr>`
+                : Object.keys(cliMap).map(cli => `
+                    <tr class="hover:bg-slate-50">
+                        <td class="px-4 py-2.5 font-medium text-slate-700">${cli}</td>
+                        <td class="px-4 py-2.5 text-center text-slate-600">${cliMap[cli].compras}</td>
+                        <td class="px-4 py-2.5 text-right font-semibold text-blue-600">R$ ${cliMap[cli].total.toFixed(2)}</td>
+                    </tr>
+                `).join('');
 
-            // Tabela Histórico
+            // Histórico
             const corpoHistorico = document.getElementById('tabela-historico-corpo');
-            corpoHistorico.innerHTML = '';
-            if (filtradas.length === 0) {
-                corpoHistorico.innerHTML = `<tr><td colspan="7" class="px-4 py-4 text-center text-slate-400">Nenhum registro encontrado no período</td></tr>`;
-            } else {
-                // Ordenar por data decrescente
-                filtradas.sort((a, b) => new Date(b.data) - new Date(a.data)).forEach(v => {
-                    const dataFormatada = v.data.split('-').reverse().join('/');
-                    corpoHistorico.innerHTML += `
-                        <tr class="hover:bg-slate-50">
-                            <td class="px-4 py-3 text-slate-600">${dataFormatada}</td>
-                            <td class="px-4 py-3 font-medium text-slate-700">${v.cliente}</td>
-                            <td class="px-4 py-3 text-slate-600">${v.produto}</td>
-                            <td class="px-4 py-3 text-center text-slate-600">${v.quantidade}</td>
-                            <td class="px-4 py-3 text-right text-slate-600">R$ ${v.valorUnitario.toFixed(2)}</td>
-                            <td class="px-4 py-3 text-right font-bold text-emerald-600">R$ ${v.total.toFixed(2)}</td>
-                            <td class="px-4 py-3 text-center space-x-2">
-                                <button onclick="gerarReciboPDFById(${v.id})" title="Baixar Recibo PDF" class="text-blue-600 hover:text-blue-800"><i class="fa-solid fa-file-pdf"></i></button>
-                                <button onclick="compartilharWhatsApp(${v.id})" title="Enviar WhatsApp" class="text-green-600 hover:text-green-800"><i class="fa-brands fa-whatsapp"></i></button>
-                                <button onclick="excluirVenda(${v.id})" title="Excluir Venda" class="text-red-500 hover:text-red-700"><i class="fa-solid fa-trash"></i></button>
-                            </td>
-                        </tr>
-                    `;
-                });
-            }
+            corpoHistorico.innerHTML = filtradas.length === 0
+                ? `<tr><td colspan="7" class="px-4 py-4 text-center text-slate-400">Nenhum registro encontrado</td></tr>`
+                : filtradas.sort((a, b) => new Date(b.data) - new Date(a.data)).map(v => `
+                    <tr class="hover:bg-slate-50">
+                        <td class="px-4 py-3 text-slate-600">${v.data.split('-').reverse().join('/')}</td>
+                        <td class="px-4 py-3 font-medium text-slate-700">${v.cliente}</td>
+                        <td class="px-4 py-3 text-slate-600">${v.produto}</td>
+                        <td class="px-4 py-3 text-center text-slate-600">${v.quantidade}</td>
+                        <td class="px-4 py-3 text-right text-slate-600">R$ ${v.valorUnitario.toFixed(2)}</td>
+                        <td class="px-4 py-3 text-right font-bold text-emerald-600">R$ ${v.total.toFixed(2)}</td>
+                        <td class="px-4 py-3 text-center space-x-2">
+                            <button onclick="gerarReciboPDFById(${v.id})" title="Baixar PDF" class="text-blue-600 hover:text-blue-800"><i class="fa-solid fa-file-pdf text-base"></i></button>
+                            <button onclick="compartilharWhatsApp(${v.id})" title="WhatsApp" class="text-green-600 hover:text-green-800"><i class="fa-brands fa-whatsapp text-base"></i></button>
+                            <button onclick="excluirVenda(${v.id})" title="Excluir" class="text-red-500 hover:text-red-700"><i class="fa-solid fa-trash text-base"></i></button>
+                        </td>
+                    </tr>
+                `).join('');
         }
 
         function excluirVenda(id) {
-            if (confirm("Deseja realmente excluir este registro de venda?")) {
+            if (confirm("Deseja realmente excluir este registro?")) {
                 vendas = vendas.filter(v => v.id !== id);
                 salvarStorage();
                 atualizarIndicadores();
             }
         }
 
-        // Geração de Recibo em PDF
-        function gerarReciboPDF(v) {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(16);
-            doc.text("RC SERVIÇO E COMÉRCIO", 105, 20, { align: "center" });
-
-            doc.setFont("helvetica", "normal");
-            doc.setFontSize(10);
-            doc.text("RECIBO DE PAGAMENTO", 105, 27, { align: "center" });
-
-            doc.line(20, 32, 190, 32);
-
-            doc.setFontSize(11);
-            doc.text(`Recibo Nº: ${v.id}`, 20, 42);
-            doc.text(`Data: ${v.data.split('-').reverse().join('/')}`, 20, 50);
-
-            doc.text(`Recebemos de: ${v.cliente}`, 20, 64);
-            doc.text(`A quantia de: R$ ${v.total.toFixed(2)}`, 20, 72);
-
-            doc.text("Referente ao produto / serviço:", 20, 86);
-            doc.text(`- ${v.produto} (Qtd: ${v.quantidade} x R$ ${v.valorUnitario.toFixed(2)})`, 25, 94);
-
-            doc.line(50, 140, 160, 140);
-            doc.text("RC Serviço e Comércio", 105, 147, { align: "center" });
-            doc.text("Assinatura / Carimbo", 105, 153, { align: "center" });
-
-            doc.save(`recibo_${v.cliente}_${v.data}.pdf`);
-        }
-
-        function gerarReciboPDFById(id) {
-            const v = vendas.find(item => item.id === id);
-            if (v) gerarReciboPDF(v);
-        }
-
-        // Compartilhar WhatsApp Venda Individual
-        function compartilharWhatsApp(id) {
-            const v = vendas.find(item => item.id === id);
-            if (!v) return;
-
-            const texto = `*RC SERVIÇO E COMÉRCIO - RECIBO*` +
-                          `\n\n*Cliente:* ${v.cliente}` +
-                          `\n*Data:* ${v.data.split('-').reverse().join('/')}` +
-                          `\n*Produto:* ${v.produto}` +
-                          `\n*Quantidade:* ${v.quantidade}` +
-                          `\n*Valor Unitário:* R$ ${v.valorUnitario.toFixed(2)}` +
-                          `\n*Total:* *R$ ${v.total.toFixed(2)}*` +
-                          `\n\nObrigado pela preferência!`;
-
-            const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`;
-            window.open(url, '_blank');
-        }
-
-        // Compartilhar Resumo do Período
-        function compartilharResumoWhatsApp() {
-            const filtradas = getVendasFiltradas();
-            const inicio = document.getElementById('filtro_inicio').value.split('-').reverse().join('/');
-            const fim = document.getElementById('filtro_fim').value.split('-').reverse().join('/');
-            const faturamento = filtradas.reduce((acc, v) => acc + v.total, 0);
-            const totalItens = filtradas.reduce((acc, v) => acc + v.quantidade, 0);
-
-            const texto = `*RC SERVIÇO E COMÉRCIO - RELATÓRIO*` +
-                          `\nPeríodo: ${inicio} a ${fim}` +
-                          `\n\n*Faturamento:* R$ ${faturamento.toFixed(2)}` +
-                          `\n*Total de Itens:* ${totalItens}` +
-                          `\n*Qtd de Vendas:* ${filtradas.length}` +
-                          `\n\nGerado via Sistema RC Serviço e Comércio`;
-
-            const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`;
-            window.open(url, '_blank');
-        }
-
-        // Gerar Relatório PDF Consolidado
         function gerarRelatorioPDF() {
             const filtradas = getVendasFiltradas();
             if (filtradas.length === 0) {
-                alert("Não há dados no período selecionado para gerar o relatório.");
+                alert("Não há dados no período selecionado.");
                 return;
             }
 
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-
             const inicio = document.getElementById('filtro_inicio').value.split('-').reverse().join('/');
             const fim = document.getElementById('filtro_fim').value.split('-').reverse().join('/');
 
+            doc.setFillColor(30, 58, 138);
+            doc.rect(0, 0, 210, 35, "F");
+
+            doc.setTextColor(255, 255, 255);
             doc.setFont("helvetica", "bold");
             doc.setFontSize(16);
-            doc.text("RC SERVIÇO E COMÉRCIO", 105, 20, { align: "center" });
-
-            doc.setFontSize(11);
-            doc.text("Relatório Consolidado de Vendas e Produtos", 105, 27, { align: "center" });
-            doc.setFontSize(9);
-            doc.text(`Período: ${inicio} até ${fim}`, 105, 33, { align: "center" });
+            doc.text("RC GESTÃO DE VENDAS", 14, 20);
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(10);
+            doc.text(`Relatório Consolidado (${inicio} até ${fim})`, 14, 27);
 
             const tableData = filtradas.map(v => [
                 v.data.split('-').reverse().join('/'),
@@ -576,21 +715,22 @@
             ]);
 
             doc.autoTable({
-                startY: 40,
-                head: [['Data', 'Cliente', 'Produto', 'Qtd', 'Unitário', 'Total']],
+                startY: 45,
+                head: [['Data', 'Cliente', 'Produto / Serviço', 'Qtd', 'Unitário', 'Total']],
                 body: tableData,
                 theme: 'striped',
-                headStyles: { fillColor: [30, 58, 138] },
+                headStyles: { fillColor: [30, 58, 138], textColor: [255, 255, 255], fontStyle: 'bold' },
                 styles: { fontSize: 9 }
             });
 
             const faturamentoTotal = filtradas.reduce((acc, v) => acc + v.total, 0);
             const qtdTotal = filtradas.reduce((acc, v) => acc + v.quantidade, 0);
-            const finalY = doc.lastAutoTable.finalY + 10;
+            const finalY = doc.lastAutoTable.finalY + 12;
 
             doc.setFont("helvetica", "bold");
             doc.setFontSize(10);
-            doc.text(`Total de Itens Vendidos: ${qtdTotal} | Faturamento Total: R$ ${faturamentoTotal.toFixed(2)}`, 20, finalY);
+            doc.setTextColor(50, 50, 50);
+            doc.text(`Total de Itens Vendidos: ${qtdTotal} | Faturamento Total: R$ ${faturamentoTotal.toFixed(2)}`, 14, finalY);
 
             doc.save(`relatorio_vendas_${inicio}_a_${fim}.pdf`);
         }
