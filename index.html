@@ -3,132 +3,229 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RC Gestão de Vendas - Sistema de Vendas e Recibos</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- jsPDF e AutoTable -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <title>RC Gestão de Vendas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col justify-between">
+<body class="bg-slate-900 text-slate-100 min-h-screen p-4">
+    <div class="max-w-md mx-auto space-y-6">
+        
+        <!-- Cabeçalho -->
+        <header class="bg-gradient-to-r from-blue-700 to-indigo-800 p-5 rounded-2xl shadow-lg">
+            <h1 class="text-xl font-bold">RC Gestão de Vendas</h1>
+            <p class="text-xs text-blue-200 mt-1">Painel Profissional de Vendas, Recibos e Notas Avulsas</p>
+            
+            <!-- Botões de Navegação -->
+            <div class="grid grid-cols-3 gap-2 mt-4">
+                <button onclick="mudarAba('venda')" id="btn-venda" class="bg-blue-600 hover:bg-blue-500 text-xs py-2 px-3 rounded-xl font-medium transition text-center shadow">Nova Venda</button>
+                <button onclick="mudarAba('nota')" id="btn-nota" class="bg-slate-700 hover:bg-slate-600 text-xs py-2 px-3 rounded-xl font-medium transition text-center shadow">Nota Avulsa</button>
+                <button onclick="mudarAba('indicadores')" id="btn-indicadores" class="bg-slate-700 hover:bg-slate-600 text-xs py-2 px-3 rounded-xl font-medium transition text-center shadow">Indicadores</button>
+            </div>
+        </header>
 
-    <!-- Cabeçalho -->
-    <header class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white shadow-lg">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center">
-            <div class="flex items-center space-x-3 mb-3 md:mb-0">
-                <div class="p-2.5 bg-blue-600/30 rounded-xl border border-blue-400/30">
-                    <i class="fa-solid fa-file-invoice-dollar text-2xl text-blue-300"></i>
-                </div>
+        <!-- ABA 1: REGISTRAR NOVA VENDA -->
+        <section id="aba-venda" class="bg-slate-800 p-5 rounded-2xl shadow-xl border border-slate-700 space-y-4">
+            <h2 class="text-lg font-semibold flex items-center gap-2">🛒 Registrar Nova Venda</h2>
+            
+            <form id="formVenda" class="space-y-4">
                 <div>
-                    <h1 class="text-xl font-bold tracking-wide">RC Gestão de Vendas</h1>
-                    <p class="text-xs text-blue-200">Painel Profissional de Vendas, Recibos e Notas Avulsas</p>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">SEU NOME / NOME DO FORNECEDOR *</label>
+                    <input type="text" id="fornecedor" value="Dom Salgados" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-blue-500">
                 </div>
-            </div>
-            <!-- Navegação por Abas -->
-            <div class="flex flex-wrap gap-2">
-                <button onclick="switchTab('vendas')" id="btn-vendas" class="px-4 py-2 rounded-xl bg-blue-600 text-white font-medium text-sm transition hover:bg-blue-500 shadow-sm flex items-center gap-2">
-                    <i class="fa-solid fa-cart-plus"></i> Nova Venda
-                </button>
-                <button onclick="switchTab('nota-avulsa')" id="btn-nota-avulsa" class="px-4 py-2 rounded-xl bg-blue-800/80 text-blue-100 font-medium text-sm transition hover:bg-blue-700 flex items-center gap-2 border border-blue-700/50">
-                    <i class="fa-solid fa-file-pen"></i> Nota Avulsa
-                </button>
-                <button onclick="switchTab('indicadores')" id="btn-indicadores" class="px-4 py-2 rounded-xl bg-blue-800/80 text-blue-100 font-medium text-sm transition hover:bg-blue-700 flex items-center gap-2 border border-blue-700/50">
-                    <i class="fa-solid fa-chart-pie"></i> Indicadores
-                </button>
-            </div>
-        </div>
-    </header>
 
-    <!-- Conteúdo Principal -->
-    <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full">
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">NOME DO CLIENTE (COMPRADOR) *</label>
+                    <input type="text" id="cliente" placeholder="Ex: Restaurante Menino Jesus" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-blue-500">
+                </div>
 
-        <!-- ABA 1: NOVA VENDA / REGISTRO -->
-        <section id="tab-vendas" class="space-y-6">
-            <div class="bg-white rounded-2xl shadow-sm p-6 md:p-8 border border-slate-200 max-w-2xl mx-auto">
-                <div class="flex items-center gap-3 mb-6 pb-3 border-b border-slate-100">
-                    <div class="p-2 bg-blue-50 text-blue-600 rounded-lg">
-                        <i class="fa-solid fa-cash-register text-lg"></i>
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">PRODUTO / SERVIÇO *</label>
+                    <input type="text" id="produto" placeholder="Ex: 585 Coxinhas" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-blue-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">QUANTIDADE *</label>
+                        <input type="text" id="quantidade" value="1" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-blue-500">
                     </div>
                     <div>
-                        <h2 class="text-lg font-bold text-slate-800">Registrar Nova Venda</h2>
-                        <p class="text-xs text-slate-500">Lançamento oficial para controle de faturamento</p>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">VALOR UNITÁRIO (R$) *</label>
+                        <input type="text" id="valorUnitario" value="0.00" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-blue-500">
                     </div>
                 </div>
 
-                <form id="form-venda" onsubmit="salvarVenda(event)" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Seu Nome / Nome do Fornecedor *</label>
-                        <input type="text" id="fornecedor" required class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm" placeholder="Ex: Dom Salgados / Seu Nome">
-                    </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">TOTAL (R$)</label>
+                    <input type="text" id="valorTotal" readonly class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-3 py-2 text-sm text-emerald-400 font-bold">
+                </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Nome do Cliente (Comprador) *</label>
-                            <input type="text" id="cliente" required class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm" placeholder="Ex: Restaurante Menino Jesus">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Produto / Serviço *</label>
-                            <input type="text" id="produto" required class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm" placeholder="Ex: 585 Coxinha">
-                        </div>
-                    </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">DATA DA VENDA *</label>
+                    <input type="date" id="dataVenda" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-blue-500">
+                </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Quantidade *</label>
-                            <input type="number" id="quantidade" min="1" value="1" required oninput="calcularTotal()" class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Valor Unitário (R$) *</label>
-                            <input type="text" id="valor_unitario" value="0,00" required oninput="calcularTotal()" class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm" placeholder="0,00">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Total (R$)</label>
-                            <input type="text" id="total_venda" readonly class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-700 font-bold text-sm">
-                        </div>
-                    </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-semibold text-sm transition shadow-lg">Salvar Venda</button>
+            </form>
+        </section>
 
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Data da Venda *</label>
-                        <input type="date" id="data_venda" required class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm">
-                    </div>
+        <!-- ABA 2: NOTA AVULSA -->
+        <section id="aba-nota" class="bg-slate-800 p-5 rounded-2xl shadow-xl border border-slate-700 space-y-4 hidden">
+            <h2 class="text-lg font-semibold flex items-center gap-2">📄 Nota Avulsa / Recibo</h2>
+            <div id="conteudoNota" class="bg-slate-900 p-4 rounded-xl border border-slate-700 text-sm space-y-2">
+                <p class="text-slate-400 text-center">Nenhuma venda selecionada ou registrada recente.</p>
+            </div>
+            <button onclick="window.print()" class="w-full bg-emerald-600 hover:bg-emerald-500 py-3 rounded-xl font-semibold text-sm transition shadow-lg">Imprimir / Salvar PDF</button>
+        </section>
 
-                    <div class="pt-3 flex flex-col sm:flex-row gap-3">
-                        <button type="submit" class="flex-1 bg-blue-600 text-white font-medium py-3 px-4 rounded-xl hover:bg-blue-700 transition shadow-sm text-sm flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-floppy-disk"></i> Salvar e Registrar Venda
-                        </button>
-                        <button type="button" onclick="limparFormulario()" class="bg-slate-100 text-slate-700 font-medium py-3 px-4 rounded-xl hover:bg-slate-200 transition text-sm">
-                            Limpar
-                        </button>
-                    </div>
-                </form>
+        <!-- ABA 3: INDICADORES -->
+        <section id="aba-indicadores" class="bg-slate-800 p-5 rounded-2xl shadow-xl border border-slate-700 space-y-4 hidden">
+            <h2 class="text-lg font-semibold flex items-center gap-2">📊 Indicadores de Vendas</h2>
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-slate-900 p-3 rounded-xl border border-slate-700">
+                    <span class="text-xs text-slate-400">Total de Vendas</span>
+                    <p id="indTotalVendas" class="text-lg font-bold text-blue-400">0</p>
+                </div>
+                <div class="bg-slate-900 p-3 rounded-xl border border-slate-700">
+                    <span class="text-xs text-slate-400">Faturamento</span>
+                    <p id="indFaturamento" class="text-lg font-bold text-emerald-400">R$ 0,00</p>
+                </div>
+            </div>
+            <div class="space-y-2">
+                <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Histórico Recente</h3>
+                <div id="listaHistorico" class="space-y-2 max-h-60 overflow-y-auto">
+                    <!-- Preenchido via JS -->
+                </div>
             </div>
         </section>
 
-        <!-- ABA 2: NOTA AVULSA CORPORATIVA COM INTEGRAÇÃO -->
-        <section id="tab-nota-avulsa" class="hidden space-y-6">
-            <div class="bg-white rounded-2xl shadow-sm p-6 md:p-8 border border-slate-200 max-w-2xl mx-auto">
-                <div class="flex items-center gap-3 mb-6 pb-3 border-b border-slate-100">
-                    <div class="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
-                        <i class="fa-solid fa-file-shield text-lg"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-lg font-bold text-slate-800">Emissão de Nota / Recibo Avulso</h2>
-                        <p class="text-xs text-slate-500">Puxe dados de uma venda cadastrada ou preencha manualmente</p>
-                    </div>
-                </div>
+    </div>
 
-                <!-- Atalho de Integração com Vendas Cadastradas -->
-                <div class="mb-6 p-4 bg-blue-50/70 border border-blue-200 rounded-xl">
-                    <label class="block text-xs font-bold uppercase text-blue-900 mb-1.5">
-                        <i class="fa-solid fa-link mr-1"></i> Puxar Dados de Venda Cadastrada (Opcional):
-                    </label>
-                    <select id="select-venda-integrada" onchange="preencherNotaComVenda()" class="w-full px-3.5 py-2.5 border border-blue-300 rounded-xl bg-white text-sm text-slate-700 focus:ring-2 focus:ring-blue-600">
-                        <option value="">Selecione uma venda cadastrada para preencher automático...</option>
-                    </select>
-                </div>
+    <script>
+        // Data atual no input
+        document.getElementById('dataVenda').valueAsDate = new Date();
 
-                <form id="form-nota-avulsa" onsubmit="gerarNotaAvulsaPDF(event)" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">
+        // Conversor seguro aceitando ponto (.) e vírgula (,)
+        function parseNumero(valor) {
+            if (!valor) return 0;
+            if (typeof valor === 'number') return valor;
+            let limpo = valor.toString().trim().replace(/\s/g, '');
+            // Se tem ponto e vírgula, assume formato brasileiro 1.234,56
+            if (limpo.includes('.') && limpo.includes(',')) {
+                limpo = limpo.replace(/\./g, '').replace(',', '.');
+            } else if (limpo.includes(',')) {
+                limpo = limpo.replace(',', '.');
+            }
+            return parseFloat(limpo) || 0;
+        }
+
+        // Cálculo Automático
+        const inputQtd = document.getElementById('quantidade');
+        const inputUnit = document.getElementById('valorUnitario');
+        const inputTotal = document.getElementById('valorTotal');
+
+        function calcular() {
+            let qtd = parseNumero(inputQtd.value);
+            let unit = parseNumero(inputUnit.value);
+            let total = qtd * unit;
+            inputTotal.value = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        inputQtd.addEventListener('input', calcular);
+        inputUnit.addEventListener('input', calcular);
+        calcular();
+
+        // Troca de Abas Segura
+        function mudarAba(aba) {
+            ['venda', 'nota', 'indicadores'].forEach(a => {
+                document.getElementById(`aba-${a}`).classList.add('hidden');
+                document.getElementById(`btn-${a}`).className = "bg-slate-700 hover:bg-slate-600 text-xs py-2 px-3 rounded-xl font-medium transition text-center shadow";
+            });
+            document.getElementById(`aba-${aba}`).classList.remove('hidden');
+            document.getElementById(`btn-${aba}`).className = "bg-blue-600 hover:bg-blue-500 text-xs py-2 px-3 rounded-xl font-medium transition text-center shadow";
+
+            if (aba === 'indicadores') atualizarIndicadores();
+            if (aba === 'nota') atualizarNotaAvulsa();
+        }
+
+        // Salvar Vendas (localStorage)
+        let vendas = JSON.parse(localStorage.getItem('rc_vendas')) || [];
+
+        document.getElementById('formVenda').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const novaVenda = {
+                id: Date.now(),
+                fornecedor: document.getElementById('fornecedor').value,
+                cliente: document.getElementById('cliente').value,
+                produto: document.getElementById('produto').value,
+                quantidade: parseNumero(inputQtd.value),
+                valorUnitario: parseNumero(inputUnit.value),
+                valorTotal: parseNumero(inputQtd.value) * parseNumero(inputUnit.value),
+                data: document.getElementById('dataVenda').value
+            };
+
+            vendas.unshift(novaVenda); // Adiciona no início
+            localStorage.setItem('rc_vendas', JSON.stringify(vendas));
+
+            alert('Venda registrada com sucesso!');
+            this.reset();
+            document.getElementById('dataVenda').valueAsDate = new Date();
+            document.getElementById('fornecedor').value = "Dom Salgados";
+            calcular();
+            mudarAba('indicadores');
+        });
+
+        // Atualizar Indicadores e Histórico
+        function atualizarIndicadores() {
+            vendas = JSON.parse(localStorage.getItem('rc_vendas')) || [];
+            document.getElementById('indTotalVendas').innerText = vendas.length;
+            
+            let faturamentoTotal = vendas.reduce((acc, v) => acc + v.valorTotal, 0);
+            document.getElementById('indFaturamento').innerText = faturamentoTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+            let html = '';
+            if (vendas.length === 0) {
+                html = '<p class="text-xs text-slate-500 text-center py-4">Nenhuma venda registrada ainda.</p>';
+            } else {
+                vendas.forEach(v => {
+                    html += `
+                        <div class="bg-slate-900 p-3 rounded-xl border border-slate-700 text-xs space-y-1">
+                            <div class="flex justify-between font-semibold">
+                                <span class="text-blue-400">${v.cliente}</span>
+                                <span class="text-emerald-400">${v.valorTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                            </div>
+                            <div class="text-slate-400">${v.produto} (Qtd: ${v.quantidade})</div>
+                            <div class="text-slate-500 text-[10px]">Data: ${v.data.split('-').reverse().join('/')} | Fornecedor: ${v.fornecedor}</div>
+                        </div>
+                    `;
+                });
+            }
+            document.getElementById('listaHistorico').innerHTML = html;
+        }
+
+        // Atualizar Nota Avulsa com a última venda
+        function atualizarNotaAvulsa() {
+            vendas = JSON.parse(localStorage.getItem('rc_vendas')) || [];
+            const container = document.getElementById('conteudoNota');
+            if (vendas.length === 0) {
+                container.innerHTML = '<p class="text-slate-400 text-center">Nenhuma venda registrada para gerar nota.</p>';
+                return;
+            }
+            const v = vendas[0]; // Pega a última venda
+            container.innerHTML = `
+                <div class="border-b border-slate-800 pb-2 mb-2">
+                    <p class="font-bold text-base text-blue-400">${v.fornecedor}</p>
+                    <p class="text-xs text-slate-400">Comprovante de Venda / Nota Avulsa</p>
+                </div>
+                <div class="space-y-1">
+                    <p><strong>Cliente:</strong> ${v.cliente}</p>
+                    <p><strong>Produto/Serviço:</strong> ${v.produto}</p>
+                    <p><strong>Quantidade:</strong> ${v.quantidade}</p>
+                    <p><strong>Valor Unitário:</strong> ${v.valorUnitario.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+                    <p class="text-emerald-400 font-bold pt-2 border-t border-slate-800">Total: ${v.valorTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+                    <p class="text-[10px] text-slate-500 pt-1">Data: ${v.data.split('-').reverse().join('/')}</p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
