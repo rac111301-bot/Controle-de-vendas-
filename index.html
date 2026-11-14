@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RC Gestão de Vendas</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Biblioteca jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen p-4">
     <div class="max-w-md mx-auto space-y-6">
@@ -12,7 +14,7 @@
         <!-- Cabeçalho -->
         <header class="bg-gradient-to-r from-blue-700 to-indigo-800 p-5 rounded-2xl shadow-lg">
             <h1 class="text-xl font-bold">RC Gestão de Vendas</h1>
-            <p class="text-xs text-blue-200 mt-1">Painel Profissional de Vendas, Recibos e Notas Avulsas</p>
+            <p class="text-xs text-blue-200 mt-1">Painel Profissional de Vendas e Notas Avulsas</p>
             
             <!-- Botões de Navegação -->
             <div class="grid grid-cols-3 gap-2 mt-4">
@@ -28,7 +30,7 @@
             
             <form id="formVenda" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-medium text-slate-300 mb-1">SEU NOME / NOME DO FORNECEDOR *</label>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">SEU NOME / FORNECEDOR *</label>
                     <input type="text" id="fornecedor" value="Dom Salgados" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-blue-500">
                 </div>
 
@@ -39,7 +41,7 @@
 
                 <div>
                     <label class="block text-xs font-medium text-slate-300 mb-1">PRODUTO / SERVIÇO *</label>
-                    <input type="text" id="produto" placeholder="Ex: 585 Coxinhas" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-blue-500">
+                    <input type="text" id="produto" placeholder="Ex: Coxinha" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-blue-500">
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
@@ -71,9 +73,18 @@
         <section id="aba-nota" class="bg-slate-800 p-5 rounded-2xl shadow-xl border border-slate-700 space-y-4 hidden">
             <h2 class="text-lg font-semibold flex items-center gap-2">📄 Nota Avulsa / Recibo</h2>
             <div id="conteudoNota" class="bg-slate-900 p-4 rounded-xl border border-slate-700 text-sm space-y-2">
-                <p class="text-slate-400 text-center">Nenhuma venda selecionada ou registrada recente.</p>
+                <p class="text-slate-400 text-center">Nenhuma venda registrada recente.</p>
             </div>
-            <button onclick="window.print()" class="w-full bg-emerald-600 hover:bg-emerald-500 py-3 rounded-xl font-semibold text-sm transition shadow-lg">Imprimir / Salvar PDF</button>
+            
+            <!-- Botões de Ação para Celular -->
+            <div class="space-y-2 pt-2">
+                <button onclick="gerarPDFNota()" class="w-full bg-emerald-600 hover:bg-emerald-500 py-3 rounded-xl font-semibold text-sm transition shadow-lg flex items-center justify-center gap-2">
+                    📥 Visualizar / Baixar PDF
+                </button>
+                <button onclick="enviarWhatsApp()" class="w-full bg-green-600 hover:bg-green-500 py-3 rounded-xl font-semibold text-sm transition shadow-lg flex items-center justify-center gap-2">
+                    💬 Enviar pelo WhatsApp
+                </button>
+            </div>
         </section>
 
         <!-- ABA 3: INDICADORES -->
@@ -90,7 +101,7 @@
                 </div>
             </div>
             <div class="space-y-2">
-                <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Histórico Recente</h3>
+                <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Histórico de Vendas Salvas</h3>
                 <div id="listaHistorico" class="space-y-2 max-h-60 overflow-y-auto">
                     <!-- Preenchido via JS -->
                 </div>
@@ -100,15 +111,12 @@
     </div>
 
     <script>
-        // Data atual no input
         document.getElementById('dataVenda').valueAsDate = new Date();
 
-        // Conversor seguro aceitando ponto (.) e vírgula (,)
         function parseNumero(valor) {
             if (!valor) return 0;
             if (typeof valor === 'number') return valor;
             let limpo = valor.toString().trim().replace(/\s/g, '');
-            // Se tem ponto e vírgula, assume formato brasileiro 1.234,56
             if (limpo.includes('.') && limpo.includes(',')) {
                 limpo = limpo.replace(/\./g, '').replace(',', '.');
             } else if (limpo.includes(',')) {
@@ -117,7 +125,6 @@
             return parseFloat(limpo) || 0;
         }
 
-        // Cálculo Automático
         const inputQtd = document.getElementById('quantidade');
         const inputUnit = document.getElementById('valorUnitario');
         const inputTotal = document.getElementById('valorTotal');
@@ -133,7 +140,6 @@
         inputUnit.addEventListener('input', calcular);
         calcular();
 
-        // Troca de Abas Segura
         function mudarAba(aba) {
             ['venda', 'nota', 'indicadores'].forEach(a => {
                 document.getElementById(`aba-${a}`).classList.add('hidden');
@@ -146,7 +152,6 @@
             if (aba === 'nota') atualizarNotaAvulsa();
         }
 
-        // Salvar Vendas (localStorage)
         let vendas = JSON.parse(localStorage.getItem('rc_vendas')) || [];
 
         document.getElementById('formVenda').addEventListener('submit', function(e) {
@@ -163,10 +168,10 @@
                 data: document.getElementById('dataVenda').value
             };
 
-            vendas.unshift(novaVenda); // Adiciona no início
+            vendas.unshift(novaVenda);
             localStorage.setItem('rc_vendas', JSON.stringify(vendas));
 
-            alert('Venda registrada com sucesso!');
+            alert('Venda registrada e salva com sucesso!');
             this.reset();
             document.getElementById('dataVenda').valueAsDate = new Date();
             document.getElementById('fornecedor').value = "Dom Salgados";
@@ -174,7 +179,6 @@
             mudarAba('indicadores');
         });
 
-        // Atualizar Indicadores e Histórico
         function atualizarIndicadores() {
             vendas = JSON.parse(localStorage.getItem('rc_vendas')) || [];
             document.getElementById('indTotalVendas').innerText = vendas.length;
@@ -202,7 +206,6 @@
             document.getElementById('listaHistorico').innerHTML = html;
         }
 
-        // Atualizar Nota Avulsa com a última venda
         function atualizarNotaAvulsa() {
             vendas = JSON.parse(localStorage.getItem('rc_vendas')) || [];
             const container = document.getElementById('conteudoNota');
@@ -210,7 +213,7 @@
                 container.innerHTML = '<p class="text-slate-400 text-center">Nenhuma venda registrada para gerar nota.</p>';
                 return;
             }
-            const v = vendas[0]; // Pega a última venda
+            const v = vendas[0];
             container.innerHTML = `
                 <div class="border-b border-slate-800 pb-2 mb-2">
                     <p class="font-bold text-base text-blue-400">${v.fornecedor}</p>
@@ -225,6 +228,70 @@
                     <p class="text-[10px] text-slate-500 pt-1">Data: ${v.data.split('-').reverse().join('/')}</p>
                 </div>
             `;
+        }
+
+        // Geração otimizada de PDF para iPhone (Abre visualizador limpo)
+        function gerarPDFNota() {
+            vendas = JSON.parse(localStorage.getItem('rc_vendas')) || [];
+            if (vendas.length === 0) {
+                alert('Nenhuma venda para exportar.');
+                return;
+            }
+            const v = vendas[0];
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(16);
+            doc.text(v.fornecedor, 20, 20);
+
+            doc.setFontSize(11);
+            doc.setFont("helvetica", "normal");
+            doc.text("Comprovante de Venda / Nota Avulsa", 20, 28);
+
+            doc.setLineWidth(0.5);
+            doc.line(20, 33, 190, 33);
+
+            doc.setFont("helvetica", "bold");
+            doc.text("Dados da Venda:", 20, 45);
+            doc.setFont("helvetica", "normal");
+            doc.text(`Cliente: ${v.cliente}`, 20, 55);
+            doc.text(`Produto / Serviço: ${v.produto}`, 20, 63);
+            doc.text(`Quantidade: ${v.quantidade}`, 20, 71);
+            doc.text(`Valor Unitário: ${v.valorUnitario.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`, 20, 79);
+            
+            doc.setFont("helvetica", "bold");
+            doc.text(`Valor Total: ${v.valorTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`, 20, 91);
+            doc.text(`Data: ${v.data.split('-').reverse().join('/')}`, 20, 99);
+
+            // Abre o PDF em uma nova aba no iPhone de forma compatível
+            const pdfDataUri = doc.output('datauristring');
+            const novaAba = window.open();
+            if (novaAba) {
+                novaAba.document.write(`<iframe src="${pdfDataUri}" style="width:100%; height:100%; border:none; margin:0; padding:0;"></iframe>`);
+            } else {
+                alert('Permita os pop-ups no navegador para visualizar o PDF.');
+            }
+        }
+
+        // Envio direto para o WhatsApp no iPhone
+        function enviarWhatsApp() {
+            vendas = JSON.parse(localStorage.getItem('rc_vendas')) || [];
+            if (vendas.length === 0) {
+                alert('Nenhuma venda registrada para enviar.');
+                return;
+            }
+            const v = vendas[0];
+            const texto = `*${v.fornecedor}* - Comprovante de Venda\n\n` +
+                          `👤 *Cliente:* ${v.cliente}\n` +
+                          `📦 *Produto:* ${v.produto}\n` +
+                          `🔢 *Qtd:* ${v.quantidade}\n` +
+                          `💰 *Unitário:* ${v.valorUnitario.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}\n` +
+                          `✅ *Total:* ${v.valorTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}\n` +
+                          `📅 *Data:* ${v.data.split('-').reverse().join('/')}`;
+
+            const url = `https://wa.me/?text=${encodeURIComponent(texto)}`;
+            window.open(url, '_blank');
         }
     </script>
 </body>
